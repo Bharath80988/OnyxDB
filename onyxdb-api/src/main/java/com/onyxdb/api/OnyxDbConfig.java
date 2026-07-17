@@ -27,4 +27,14 @@ public class OnyxDbConfig {
         // Cache 1024 pages (8 MB)
         return new BufferPool(1024, storageManager);
     }
+
+    @Bean
+    public com.onyxdb.core.index.BTreeManager bTreeManager(BufferPool bufferPool) throws IOException {
+        return new com.onyxdb.core.index.BTreeManager(bufferPool);
+    }
+
+    @Bean
+    public com.onyxdb.core.execution.ExecutionEngine executionEngine(com.onyxdb.core.index.BTreeManager bTreeManager) {
+        return new com.onyxdb.core.execution.ExecutionEngine(bTreeManager);
+    }
 }
