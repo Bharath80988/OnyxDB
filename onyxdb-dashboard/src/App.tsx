@@ -41,8 +41,9 @@ function App() {
     <div className="min-h-screen bg-base-300">
       {/* Navbar */}
       <div className="navbar bg-base-100 shadow-md px-8">
-        <div className="flex-1">
-          <a className="btn btn-ghost normal-case text-xl text-primary">OnyxDB</a>
+        <div className="flex-1 flex items-center">
+          <img src="/logo.png" alt="OnyxDB Logo" className="w-8 h-8 mr-3 object-contain rounded" />
+          <a className="btn btn-ghost normal-case text-xl text-primary p-0">OnyxDB</a>
         </div>
         <div className="flex-none">
           {error ? (
