@@ -19,6 +19,9 @@ public class BTreeManager {
 
     public BTreeManager(BufferPool bufferPool) throws IOException {
         this.bufferPool = bufferPool;
+        if (bufferPool.getNumPages() == 0) {
+            bufferPool.allocatePage(); // Allocate the root page (Page 0)
+        }
     }
 
     /**
