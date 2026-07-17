@@ -1,10 +1,10 @@
 package com.onyxdb.api;
 
-import com.onyxdb.core.storage.BufferPool;
-import com.onyxdb.core.storage.Page;
+import com.onyxdb.core.execution.ExecutionEngine;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -12,19 +12,23 @@ import java.util.Map;
 @CrossOrigin(origins = "*") // Allow dashboard to connect
 public class QueryController {
 
-    private final BufferPool bufferPool;
+    private final ExecutionEngine executionEngine;
 
-    public QueryController(BufferPool bufferPool) {
-        this.bufferPool = bufferPool;
+    public QueryController(ExecutionEngine executionEngine) {
+        this.executionEngine = executionEngine;
     }
 
     @PostMapping("/query")
     public Map<String, Object> executeQuery(@RequestBody Map<String, Object> query) {
-        // Placeholder for real query execution
         Map<String, Object> response = new HashMap<>();
-        response.put("status", "success");
-        response.put("message", "Query received: " + query.get("query"));
-        response.put("rows", new Object[0]);
+        try {
+            List<String> results = executionEngine.execute(query);
+            response.put("status", "success");
+            response.put("rows", results);
+        } catch (Exception e) {
+            response.put("status", "error");
+            response.put("message", e.getMessage());
+        }
         return response;
     }
 
