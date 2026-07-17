@@ -1,21 +1,15 @@
+# OnyxDB Status Directory
+status/
+
 # Maven
 target/
-*.jar
-*.war
-*.ear
+.maven/
 
 # Node
 node_modules/
 dist/
-dist-ssr/
-*.local
 
-# IDEs
+# IDE
 .idea/
-.vscode/
 *.iml
-*.iws
-
-# OS Files
-.DS_Store
-Thumbs.db
+.vscode/
