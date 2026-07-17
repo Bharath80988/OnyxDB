@@ -1,0 +1,9 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-onyx-900 text-onyx-100 antialiased selection:bg-onyx-600;
+  }
+}
