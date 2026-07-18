@@ -13,3 +13,6 @@ dist/
 .idea/
 *.iml
 .vscode/
+
+# Local Scripts
+*.ps1
