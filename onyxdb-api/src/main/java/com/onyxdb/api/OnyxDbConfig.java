@@ -14,8 +14,8 @@ import java.nio.file.Paths;
 public class OnyxDbConfig {
 
     @Bean
-    public StorageManager storageManager() throws IOException {
-        Path dbDir = Paths.get(System.getProperty("user.home"), "OnyxDB", "database");
+    public StorageManager storageManager(@org.springframework.beans.factory.annotation.Value("${db.storage.path:${user.home}/OnyxDB/database}") String dbPath) throws IOException {
+        Path dbDir = Paths.get(dbPath.replace("${user.home}", System.getProperty("user.home")));
         Files.createDirectories(dbDir);
         
         Path dataFile = dbDir.resolve("onyx.db");

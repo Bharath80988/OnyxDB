@@ -8,99 +8,130 @@ interface ServerStats {
 function App() {
   const [stats, setStats] = useState<ServerStats | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [query, setQuery] = useState('SELECT * FROM users;');
+  const [query, setQuery] = useState('{"action": "select"}');
   const [queryResult, setQueryResult] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    fetch('http://localhost:8080/api/stats')
-      .then(res => res.json())
-      .then(data => setStats(data))
-      .catch(err => {
+    const fetchStats = async () => {
+      try {
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+        const response = await fetch(`${apiUrl}/api/stats`);
+        const data = await response.json();
+        setStats(data);
+      } catch (err) {
         console.error(err);
         setError('Cannot connect to OnyxDB Engine');
-      });
+      }
+    };
+    fetchStats();
   }, []);
 
-  const handleQuery = () => {
-    fetch('http://localhost:8080/api/query', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query })
-    })
-    .then(res => res.json())
-    .then(data => setQueryResult(data))
-    .catch(err => console.error(err));
+  const handleQuery = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const parsedQuery = JSON.parse(query);
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+      const response = await fetch(`${apiUrl}/api/query`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(parsedQuery)
+      });
+      const data = await response.json();
+      setQueryResult(data);
+    } catch (e) {
+      setQueryResult({ status: "error", message: "Invalid JSON format or network error" });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="min-h-screen p-8">
-      <header className="mb-8 border-b border-onyx-700 pb-4">
-        <h1 className="text-3xl font-bold tracking-tight">OnyxDB</h1>
-        <p className="text-onyx-600 mt-1">Local-first embeddable relational database</p>
-      </header>
+    <div className="min-h-screen bg-base-300">
+      {/* Navbar */}
+      <div className="navbar bg-base-100 shadow-md px-8">
+        <div className="flex-1 flex items-center">
+          <img src="/logo.png" alt="OnyxDB Logo" className="w-8 h-8 mr-3 object-contain rounded invert brightness-200" />
+          <a className="btn btn-ghost normal-case text-xl text-primary p-0">OnyxDB</a>
+        </div>
+        <div className="flex-none">
+          {error ? (
+             <div className="badge badge-error gap-2">Disconnected</div>
+          ) : stats ? (
+             <div className="badge badge-success gap-2">Online</div>
+          ) : (
+             <div className="badge badge-warning gap-2">Connecting...</div>
+          )}
+        </div>
+      </div>
 
-      <main className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {/* Left Column: Status and Navigation */}
-        <aside className="space-y-6">
-          <div className="bg-onyx-800 border border-onyx-700 rounded-lg p-6">
-            <h2 className="text-lg font-semibold mb-4">Engine Status</h2>
-            {error ? (
-              <div className="text-red-400 text-sm">{error}</div>
-            ) : stats ? (
-              <div className="space-y-2 text-sm text-onyx-100">
-                <div className="flex justify-between">
-                  <span className="text-onyx-600">Status</span>
-                  <span className="text-emerald-400 capitalize">{stats.status}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-onyx-600">Uptime</span>
-                  <span>{new Date(stats.uptime).toLocaleTimeString()}</span>
-                </div>
-              </div>
-            ) : (
-              <div className="text-onyx-600 text-sm">Connecting...</div>
-            )}
+      <div className="p-8 grid grid-cols-1 lg:grid-cols-4 gap-8">
+        
+        {/* Sidebar */}
+        <div className="lg:col-span-1 space-y-6">
+          <div className="card bg-base-100 shadow-xl">
+            <div className="card-body">
+              <h2 className="card-title text-sm uppercase text-gray-500">Navigation</h2>
+              <ul className="menu bg-base-200 rounded-box">
+                <li><a className="active">Query Console</a></li>
+                <li><a>Storage Explorer</a></li>
+                <li><a>Transactions</a></li>
+                <li><a>Settings</a></li>
+              </ul>
+            </div>
           </div>
 
-          <nav className="bg-onyx-800 border border-onyx-700 rounded-lg p-4">
-            <ul className="space-y-2 text-sm">
-              <li><button className="w-full text-left px-3 py-2 bg-onyx-700 rounded text-onyx-100">Query Console</button></li>
-              <li><button className="w-full text-left px-3 py-2 text-onyx-600 hover:text-onyx-100">Storage Explorer</button></li>
-              <li><button className="w-full text-left px-3 py-2 text-onyx-600 hover:text-onyx-100">Transactions</button></li>
-              <li><button className="w-full text-left px-3 py-2 text-onyx-600 hover:text-onyx-100">Settings</button></li>
-            </ul>
-          </nav>
-        </aside>
+          <div className="card bg-base-100 shadow-xl">
+            <div className="card-body">
+              <h2 className="card-title text-sm uppercase text-gray-500">Engine Stats</h2>
+              {stats && !error && (
+                <div className="stats stats-vertical shadow mt-2">
+                  <div className="stat">
+                    <div className="stat-title">Uptime</div>
+                    <div className="stat-value text-lg">{new Date(stats.uptime).toLocaleTimeString()}</div>
+                  </div>
+                  <div className="stat">
+                    <div className="stat-title">Pages Loaded</div>
+                    <div className="stat-value text-lg">0</div>
+                  </div>
+                </div>
+              )}
+              {error && <p className="text-error text-sm">{error}</p>}
+            </div>
+          </div>
+        </div>
 
-        {/* Right Column: Query Area */}
-        <div className="md:col-span-2 space-y-6">
-          <div className="bg-onyx-800 border border-onyx-700 rounded-lg p-6 flex flex-col h-[300px]">
-            <h2 className="text-lg font-semibold mb-4">Query Console</h2>
-            <textarea 
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              className="flex-grow bg-onyx-900 border border-onyx-700 rounded p-4 font-mono text-sm resize-none focus:outline-none focus:border-onyx-600"
-            />
-            <div className="mt-4 flex justify-end">
-              <button 
-                onClick={handleQuery}
-                className="bg-onyx-100 text-onyx-900 px-4 py-2 rounded text-sm font-semibold hover:bg-white transition-colors"
-              >
-                Run Query
-              </button>
+        {/* Main Content */}
+        <div className="lg:col-span-3 space-y-6">
+          <div className="card bg-base-100 shadow-xl">
+            <div className="card-body flex flex-col h-[400px]">
+              <h2 className="card-title text-sm uppercase text-gray-500">JSON Query</h2>
+              <textarea 
+                className="textarea textarea-bordered flex-grow font-mono text-sm resize-none focus:outline-none bg-base-200"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder='{"action": "select"}'
+              ></textarea>
+              <div className="card-actions justify-end mt-4">
+                <button className="btn btn-primary" onClick={handleQuery}>Execute</button>
+              </div>
             </div>
           </div>
 
           {queryResult && (
-            <div className="bg-onyx-800 border border-onyx-700 rounded-lg p-6">
-              <h2 className="text-lg font-semibold mb-4">Result</h2>
-              <pre className="bg-onyx-900 p-4 rounded text-sm font-mono overflow-auto border border-onyx-700 text-emerald-400">
-                {JSON.stringify(queryResult, null, 2)}
-              </pre>
+            <div className="card bg-base-100 shadow-xl">
+              <div className="card-body">
+                <h2 className="card-title text-sm uppercase text-gray-500">Result</h2>
+                <div className="mockup-code bg-base-300 text-primary-content">
+                  <pre data-prefix=">"><code>{JSON.stringify(queryResult, null, 2)}</code></pre>
+                </div>
+              </div>
             </div>
           )}
         </div>
-      </main>
+
+      </div>
     </div>
   );
 }

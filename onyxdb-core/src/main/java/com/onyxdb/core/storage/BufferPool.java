@@ -63,6 +63,21 @@ public class BufferPool {
         }
     }
 
+    public Page allocatePage() throws IOException {
+        lock.lock();
+        try {
+            Page page = storageManager.allocatePage();
+            cache.put(page.getPageId(), page);
+            return page;
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    public int getNumPages() {
+        return storageManager.getNumPages();
+    }
+
     public void flushAll() throws IOException {
         lock.lock();
         try {
