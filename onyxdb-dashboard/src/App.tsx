@@ -10,30 +10,40 @@ function App() {
   const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState('{"action": "select"}');
   const [queryResult, setQueryResult] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    fetch('http://localhost:8080/api/stats')
-      .then(res => res.json())
-      .then(data => setStats(data))
-      .catch(err => {
+    const fetchStats = async () => {
+      try {
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+        const response = await fetch(`${apiUrl}/api/stats`);
+        const data = await response.json();
+        setStats(data);
+      } catch (err) {
         console.error(err);
         setError('Cannot connect to OnyxDB Engine');
-      });
+      }
+    };
+    fetchStats();
   }, []);
 
-  const handleQuery = () => {
+  const handleQuery = async () => {
     try {
+      setLoading(true);
+      setError(null);
       const parsedQuery = JSON.parse(query);
-      fetch('http://localhost:8080/api/query', {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+      const response = await fetch(`${apiUrl}/api/query`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(parsedQuery)
-      })
-      .then(res => res.json())
-      .then(data => setQueryResult(data))
-      .catch(err => console.error(err));
+      });
+      const data = await response.json();
+      setQueryResult(data);
     } catch (e) {
-      setQueryResult({ status: "error", message: "Invalid JSON format" });
+      setQueryResult({ status: "error", message: "Invalid JSON format or network error" });
+    } finally {
+      setLoading(false);
     }
   };
 

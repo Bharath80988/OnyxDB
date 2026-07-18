@@ -16,3 +16,7 @@ dist/
 
 # Local Scripts
 *.ps1
+
+# Secrets
+.env
+.env.*
