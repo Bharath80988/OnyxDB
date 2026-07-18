@@ -87,3 +87,13 @@ OnyxDB operates across three isolated modules:
 - onyxdb-core: The pure Java 21 storage and execution engine. Contains the Page Manager, B+ Tree logic, and WAL.
 - onyxdb-api: The Spring Boot management layer that exposes the REST API.
 - onyxdb-dashboard: The React/Tailwind frontend for observability.
+
+## Roadmap (Upcoming Features)
+
+OnyxDB is actively being developed. The following features are on the immediate roadmap:
+
+- **Omni-Channel Queries:** We are building a visual node-based query builder (like n8n/React Flow) for the UI, and a Terminal CLI for executing raw SQL strings, running in parallel with the existing JSON API.
+- **High-Performance Caching:** Integration with **Redis** to cache hot queries and bypass disk I/O.
+- **Distributed Workers:** Utilizing **Python/Celery** background workers to process heavy analytical tasks asynchronously.
+- **Containerization & CI/CD:** Packaging the ecosystem into a unified Docker image and securing deployments via **GitHub Actions**.
+- **Client SDKs:** Official lightweight client libraries for `npm` (Node.js) and `pip` (Python) to make integration effortless.
