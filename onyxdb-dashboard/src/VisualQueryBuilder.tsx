@@ -1,6 +1,5 @@
 import React, { useState, useCallback, useRef } from 'react';
 import ReactFlow, {
-  MiniMap,
   Controls,
   Background,
   useNodesState,
@@ -12,13 +11,13 @@ import ReactFlow, {
 } from 'reactflow';
 import type { Connection, Edge } from 'reactflow';
 import 'reactflow/dist/style.css';
-import { Play, Database, Filter, ArrowRight } from 'lucide-react';
+import { Play, Database, Filter } from 'lucide-react';
 
 // --- Custom Nodes for Futuristic Look ---
 const nodeStyle = "glass-card p-4 min-w-[200px] border-primary/50 shadow-glow-primary";
 const headerStyle = "flex items-center gap-2 mb-2 pb-2 border-b border-onyx-600/50";
 
-const SelectNode = ({ data }: any) => (
+const SelectNode = () => (
   <div className={nodeStyle}>
     <Handle type="target" position={Position.Left} className="w-3 h-3 bg-secondary" />
     <div className={headerStyle}>
@@ -33,7 +32,7 @@ const SelectNode = ({ data }: any) => (
   </div>
 );
 
-const FilterNode = ({ data }: any) => (
+const FilterNode = () => (
   <div className={nodeStyle}>
     <Handle type="target" position={Position.Left} className="w-3 h-3 bg-secondary" />
     <div className={headerStyle}>
