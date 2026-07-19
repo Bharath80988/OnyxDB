@@ -12,17 +12,17 @@ import java.util.Map;
 @CrossOrigin(origins = "*") // Allow dashboard to connect
 public class QueryController {
 
-    private final ExecutionEngine executionEngine;
+    private final QueryService queryService;
 
-    public QueryController(ExecutionEngine executionEngine) {
-        this.executionEngine = executionEngine;
+    public QueryController(QueryService queryService) {
+        this.queryService = queryService;
     }
 
     @PostMapping("/query")
     public Map<String, Object> executeQuery(@RequestBody Map<String, Object> query) {
         Map<String, Object> response = new HashMap<>();
         try {
-            List<String> results = executionEngine.execute(query);
+            List<String> results = queryService.executeQuery(query);
             response.put("status", "success");
             response.put("rows", results);
         } catch (Exception e) {

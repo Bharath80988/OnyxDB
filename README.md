@@ -22,7 +22,7 @@ You should use OnyxDB when:
 - JSON Structured Query API: Query your database via REST instead of strictly writing SQL strings.
 - Onyx Dashboard: A built-in Vite + React visualization layer.
 
-## Getting Started
+## Getting Started (Run Standalone)
 
 ### Prerequisites
 - **Java 21**
@@ -54,6 +54,48 @@ You should use OnyxDB when:
 
 4. **Access the Dashboard:**
    Open http://localhost:5173 in your browser. You will see the server status, memory pool stats, and the query console.
+
+## Embedding OnyxDB (Use in Your Own Java Project)
+
+OnyxDB is designed to be an embeddable database, meaning you can run it entirely inside your own Java application without running it as a standalone server. 
+
+You can pull the pure Java engine (`onyxdb-core`) directly from GitHub into your project using **JitPack**.
+
+**1. Add the JitPack repository to your `pom.xml`:**
+```xml
+<repositories>
+    <repository>
+        <id>jitpack.io</id>
+        <url>https://jitpack.io</url>
+    </repository>
+</repositories>
+```
+
+**2. Add the OnyxDB Core dependency:**
+```xml
+<dependency>
+    <groupId>com.github.Bharath80988.OnyxDB</groupId>
+    <artifactId>onyxdb-core</artifactId>
+    <version>main-SNAPSHOT</version>
+</dependency>
+```
+
+**3. Use it in your code:**
+```java
+import com.onyxdb.core.storage.StorageManager;
+import com.onyxdb.core.index.BTreeManager;
+import java.nio.file.Path;
+
+public class MyApp {
+    public static void main(String[] args) throws Exception {
+        StorageManager storage = new StorageManager(Path.of("my-database.db"));
+        BTreeManager db = new BTreeManager(storage);
+        
+        db.insert(1, "{\"name\": \"Satoshi\"}");
+        System.out.println(db.search(1));
+    }
+}
+```
 
 ## Query Syntax
 
