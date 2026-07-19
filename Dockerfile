@@ -29,7 +29,7 @@ RUN mvn clean package -DskipTests
 # Stage 3: Create the final minimal production image
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
-COPY --from=backend-build /app/backend/onyxdb-api/target/onyxdb-api-1.0.0.jar /app/onyxdb.jar
+COPY --from=backend-build /app/backend/onyxdb-api/target/onyxdb-api-0.1.0-SNAPSHOT.jar /app/onyxdb.jar
 
 # Expose the API port
 EXPOSE 8080
