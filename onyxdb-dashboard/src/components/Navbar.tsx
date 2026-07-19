@@ -1,51 +1,33 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Database, Coffee, BookOpen, LayoutDashboard, Palette, ChevronDown } from 'lucide-react';
-
-const THEMES = [
-  { id: 'light', label: 'Light', isDark: false },
-  { id: 'dark', label: 'Dark', isDark: true },
-  { id: 'synthwave', label: 'Purple (Synthwave)', isDark: true },
-  { id: 'aqua', label: 'Ocean (Aqua)', isDark: false },
-  { id: 'forest', label: 'Forest', isDark: true },
-  { id: 'sunset', label: 'Sunset', isDark: true },
-  { id: 'valentine', label: 'Rose (Valentine)', isDark: false },
-  { id: 'night', label: 'Midnight (Night)', isDark: true },
-  { id: 'coffee', label: 'Coffee', isDark: true },
-  { id: 'emerald', label: 'Mint (Emerald)', isDark: false }
-];
+import { Database, Coffee, BookOpen, LayoutDashboard, Moon, Sun } from 'lucide-react';
 
 const Navbar: React.FC = () => {
   const location = useLocation();
-  const [currentTheme, setCurrentTheme] = useState(THEMES[1]); // Default dark
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [isDark, setIsDark] = useState(true); // Default dark
 
   useEffect(() => {
-    const storedThemeId = localStorage.getItem('theme');
-    const theme = THEMES.find(t => t.id === storedThemeId) || THEMES[1];
-    applyTheme(theme);
-    
-    // Close dropdown on click outside
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsDropdownOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    const storedTheme = localStorage.getItem('theme');
+    const initDark = storedTheme ? storedTheme === 'dark' : true;
+    setIsDark(initDark);
+    applyTheme(initDark);
   }, []);
 
-  const applyTheme = (theme: typeof THEMES[0]) => {
-    document.documentElement.setAttribute('data-theme', theme.id);
-    if (theme.isDark) {
+  const toggleTheme = () => {
+    const newDark = !isDark;
+    setIsDark(newDark);
+    applyTheme(newDark);
+  };
+
+  const applyTheme = (dark: boolean) => {
+    document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+    if (dark) {
       document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
     } else {
       document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
     }
-    localStorage.setItem('theme', theme.id);
-    setCurrentTheme(theme);
-    setIsDropdownOpen(false);
   };
 
   const isActive = (path: string) => {
@@ -79,32 +61,14 @@ const Navbar: React.FC = () => {
               Status
             </Link>
             
-            {/* Theme Dropdown */}
-            <div className="relative" ref={dropdownRef}>
-              <button 
-                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-gray-200 dark:hover:bg-onyx-700 transition-colors text-sm text-gray-600 dark:text-onyx-100"
-              >
-                <Palette className="w-4 h-4" />
-                {currentTheme.label}
-                <ChevronDown className="w-3 h-3 opacity-50" />
-              </button>
-              
-              {isDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-onyx-800 border border-gray-200 dark:border-onyx-600 rounded-xl shadow-xl overflow-hidden py-1 z-50">
-                  {THEMES.map(theme => (
-                    <button
-                      key={theme.id}
-                      onClick={() => applyTheme(theme)}
-                      className={`w-full text-left px-4 py-2 text-sm transition-colors flex items-center justify-between ${currentTheme.id === theme.id ? 'bg-primary/10 text-primary font-bold' : 'text-gray-700 dark:text-onyx-100 hover:bg-gray-100 dark:hover:bg-onyx-700'}`}
-                    >
-                      {theme.label}
-                      {currentTheme.id === theme.id && <div className="w-2 h-2 rounded-full bg-primary" />}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+            {/* Simple Theme Toggle */}
+            <button 
+              onClick={toggleTheme}
+              className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-onyx-700 transition-colors text-gray-600 dark:text-onyx-100"
+              aria-label="Toggle Theme"
+            >
+              {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            </button>
 
             <a 
               href="https://buymeacoffee.com" 

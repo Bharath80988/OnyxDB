@@ -12,7 +12,7 @@ function App() {
   useEffect(() => {
     const lenis = new Lenis({
       autoRaf: true,
-      duration: 1.2,
+      duration: 0.6,
     });
 
     return () => {

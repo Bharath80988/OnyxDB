@@ -13,24 +13,24 @@ export default {
       },
       colors: {
         onyx: {
-          900: '#111111',
-          800: '#15121b',
-          700: '#211e27',
-          600: '#37333d',
+          900: '#0a0a0a',
+          800: '#121212',
+          700: '#1c1c1c',
+          600: '#2a2a2a',
           100: '#f5f5f5',
         },
         primary: {
-          DEFAULT: '#8b5cf6', // Violet 500
-          glow: 'rgba(139, 92, 246, 0.5)',
+          DEFAULT: '#10b981', // Emerald Green
+          glow: 'rgba(16, 185, 129, 0.5)',
         },
         secondary: {
-          DEFAULT: '#06b6d4', // Cyan 500
-          glow: 'rgba(6, 182, 212, 0.5)',
+          DEFAULT: '#d97706', // Light Brown/Amber
+          glow: 'rgba(217, 119, 6, 0.5)',
         }
       },
       boxShadow: {
-        'glow-primary': '0 0 20px rgba(139, 92, 246, 0.5)',
-        'glow-secondary': '0 0 20px rgba(6, 182, 212, 0.5)',
+        'glow-primary': '0 0 20px rgba(16, 185, 129, 0.5)',
+        'glow-secondary': '0 0 20px rgba(217, 119, 6, 0.5)',
       }
     },
   },
@@ -38,15 +38,7 @@ export default {
   daisyui: {
     themes: [
       "light", 
-      "dark", 
-      "synthwave", // Purple
-      "aqua",      // Ocean
-      "forest", 
-      "sunset", 
-      "valentine", // Rose
-      "night",     // Midnight
-      "coffee", 
-      "emerald"    // Mint
+      "dark"
     ],
   }
 }

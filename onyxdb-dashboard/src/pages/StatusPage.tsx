@@ -69,7 +69,7 @@ const FEATURES = [
   { title: "JSON over HTTP", status: "implemented", desc: "Native API allowing curl, fetch, and requests to query the DB." },
   { title: "Multi-Table Routing", status: "implemented", desc: "Dynamic payload routing to independent B+ Trees." },
   { title: "Visual Query Builder", status: "implemented", desc: "Node-based UI for constructing complex pipelines." },
-  { title: "10 DaisyUI Themes", status: "implemented", desc: "Dynamic frontend theming mapping to deep CSS variables." },
+  { title: "Refined Earthy Theme", status: "implemented", desc: "Dynamic light/dark modes with beautiful emerald and amber tones." },
   { title: "Scrollspy Documentation", status: "implemented", desc: "Lenis smooth scrolling with GSAP animations." },
   { title: "Background Wal (Write Ahead Log)", status: "roadmap", desc: "Durability guarantees for sudden crash recovery." },
   { title: "Vector Search (Embeddings)", status: "roadmap", desc: "HNSW graphs integrated into B+ Tree leaves for RAG." },

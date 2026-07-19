@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Terminal, Database, Shield, Globe, Github, Twitter, Linkedin } from 'lucide-react';
+import { Terminal, Database, Shield, Globe, Code, MessageSquare, Briefcase } from 'lucide-react';
 
 const Footer: React.FC = () => {
   return (
@@ -17,9 +17,9 @@ const Footer: React.FC = () => {
               The lightning-fast, local-first B+ Tree database for modern applications. Build offline, deploy anywhere.
             </p>
             <div className="flex gap-4">
-              <a href="#" className="text-gray-400 hover:text-[#00ED64] transition-colors"><Github className="w-5 h-5" /></a>
-              <a href="#" className="text-gray-400 hover:text-[#00ED64] transition-colors"><Twitter className="w-5 h-5" /></a>
-              <a href="#" className="text-gray-400 hover:text-[#00ED64] transition-colors"><Linkedin className="w-5 h-5" /></a>
+              <a href="#" className="text-gray-400 hover:text-[#00ED64] transition-colors"><Code className="w-5 h-5" /></a>
+              <a href="#" className="text-gray-400 hover:text-[#00ED64] transition-colors"><MessageSquare className="w-5 h-5" /></a>
+              <a href="#" className="text-gray-400 hover:text-[#00ED64] transition-colors"><Briefcase className="w-5 h-5" /></a>
             </div>
           </div>
 

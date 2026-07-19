@@ -91,12 +91,12 @@ const DocsPage: React.FC = () => {
                     </h4>
                     <div className="space-y-1 border-l-2 border-gray-100 dark:border-onyx-700 ml-5">
                       {framework.chapters.map((chapter) => {
-                        const sectionId = \`\${framework.id}-\${chapter.id}\`;
+                        const sectionId = `${framework.id}-${chapter.id}`;
                         return (
                           <button
                             key={chapter.id}
                             onClick={() => scrollToSection(sectionId)}
-                            className={`w-full text-left px-4 py-1.5 rounded-r-lg text-sm transition-colors relative \${
+                            className={`w-full text-left px-4 py-1.5 rounded-r-lg text-sm transition-colors relative ${
                               activeSection === sectionId ? 'text-primary font-bold bg-primary/5' : 'text-gray-500 dark:text-onyx-100/60 hover:text-gray-900 dark:hover:text-white'
                             }`}
                           >
@@ -179,7 +179,7 @@ const DocsPage: React.FC = () => {
                     {framework.chapters.map((chapter) => (
                       <section 
                         key={chapter.id} 
-                        id={\`\${framework.id}-\${chapter.id}\`} 
+                        id={`${framework.id}-${chapter.id}`} 
                         className="scroll-mt-24"
                       >
                         <h3 className="text-2xl font-bold mb-6 text-gray-800 dark:text-onyx-100/90">{chapter.title}</h3>
