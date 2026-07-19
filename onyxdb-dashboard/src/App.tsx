@@ -5,12 +5,15 @@ interface ServerStats {
   uptime: number;
 }
 
+import VisualQueryBuilder from './VisualQueryBuilder';
+
 function App() {
-  const [stats, setStats] = useState<ServerStats | null>(null);
+  const [stats, setStats] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState('{"action": "select"}');
   const [queryResult, setQueryResult] = useState<any>(null);
   const [loading, setLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState<'json' | 'visual'>('json');
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -102,34 +105,58 @@ function App() {
           </div>
         </div>
 
-        {/* Main Content */}
-        <div className="lg:col-span-3 space-y-6">
-          <div className="card bg-base-100 shadow-xl">
-            <div className="card-body flex flex-col h-[400px]">
-              <h2 className="card-title text-sm uppercase text-gray-500">JSON Query</h2>
-              <textarea 
-                className="textarea textarea-bordered flex-grow font-mono text-sm resize-none focus:outline-none bg-base-200"
+        {/* Main Content Area */}
+      <main className="max-w-6xl mx-auto px-4 py-8">
+        
+        {/* Omni-Channel Query Tabs */}
+        <div className="flex gap-4 mb-6">
+          <button 
+            className={`px-6 py-3 rounded-lg font-bold text-sm uppercase tracking-wide transition-colors ${activeTab === 'json' ? 'bg-onyx-600 text-white' : 'bg-onyx-800 text-onyx-400 hover:bg-onyx-700'}`}
+            onClick={() => setActiveTab('json')}
+          >
+            JSON REST Payload
+          </button>
+          <button 
+            className={`px-6 py-3 rounded-lg font-bold text-sm uppercase tracking-wide transition-colors flex items-center gap-2 ${activeTab === 'visual' ? 'bg-onyx-600 text-white' : 'bg-onyx-800 text-onyx-400 hover:bg-onyx-700'}`}
+            onClick={() => setActiveTab('visual')}
+          >
+            Visual Builder (Beta)
+          </button>
+        </div>
+
+        {activeTab === 'json' ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-onyx-800 rounded-lg p-6 border border-onyx-700 shadow-xl">
+              <h2 className="text-xl font-bold text-white mb-4">Query Console</h2>
+              <textarea
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder='{"action": "select"}'
-              ></textarea>
-              <div className="card-actions justify-end mt-4">
-                <button className="btn btn-primary" onClick={handleQuery}>Execute</button>
+                className="w-full h-48 bg-onyx-950 text-green-400 p-4 rounded font-mono text-sm border border-onyx-600 focus:outline-none focus:border-onyx-500 mb-4"
+                spellCheck="false"
+              />
+              <button
+                onClick={handleQuery}
+                disabled={loading}
+                className="w-full bg-onyx-600 hover:bg-onyx-500 text-white font-bold py-3 px-4 rounded transition-colors disabled:opacity-50"
+              >
+                {loading ? 'Executing...' : 'Execute Query'}
+              </button>
+              {error && <p className="text-red-400 mt-2 text-sm">{error}</p>}
+            </div>
+
+            <div className="bg-onyx-800 rounded-lg p-6 border border-onyx-700 shadow-xl">
+              <h2 className="text-xl font-bold text-white mb-4">Result</h2>
+              <div className="bg-onyx-950 rounded p-4 h-64 overflow-y-auto border border-onyx-600">
+                <pre className="text-sm font-mono text-blue-400">
+                  {queryResult ? JSON.stringify(queryResult, null, 2) : '// No results yet'}
+                </pre>
               </div>
             </div>
           </div>
-
-          {queryResult && (
-            <div className="card bg-base-100 shadow-xl">
-              <div className="card-body">
-                <h2 className="card-title text-sm uppercase text-gray-500">Result</h2>
-                <div className="mockup-code bg-base-300 text-primary-content">
-                  <pre data-prefix=">"><code>{JSON.stringify(queryResult, null, 2)}</code></pre>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
+        ) : (
+          <VisualQueryBuilder />
+        )}
+      </main>
 
       </div>
     </div>
