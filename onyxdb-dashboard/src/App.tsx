@@ -1,9 +1,6 @@
 import { useEffect, useState } from 'react';
 
-interface ServerStats {
-  status: string;
-  uptime: number;
-}
+// Removed ServerStats to fix TypeScript error
 
 import VisualQueryBuilder from './VisualQueryBuilder';
 

@@ -6,9 +6,8 @@ import ReactFlow, {
   useNodesState,
   useEdgesState,
   addEdge,
-  Connection,
-  Edge,
 } from 'reactflow';
+import type { Connection, Edge } from 'reactflow';
 import 'reactflow/dist/style.css';
 
 const initialNodes = [
