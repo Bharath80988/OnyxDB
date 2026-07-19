@@ -4,12 +4,14 @@ import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * An LRU Cache for database pages. 
- * Prevents reading from disk if the page is already in memory.
+ * Manages caching Pages in memory using an LRU eviction policy.
  */
 public class BufferPool {
+    private static final Logger log = LoggerFactory.getLogger(BufferPool.class);
     private final int capacity;
     private final StorageManager storageManager;
     private final Map<Integer, Page> cache;
@@ -41,8 +43,11 @@ public class BufferPool {
         try {
             Page page = cache.get(pageId);
             if (page == null) {
+                log.debug("BufferPool MISS for page {}", pageId);
                 page = storageManager.readPage(pageId);
                 cache.put(pageId, page);
+            } else {
+                log.debug("BufferPool HIT for page {}", pageId);
             }
             return page;
         } finally {
@@ -94,8 +99,11 @@ public class BufferPool {
 
     private void evict(Page page) throws IOException {
         if (page.isDirty()) {
+            log.debug("Evicting dirty page {} from BufferPool", page.getPageId());
             storageManager.writePage(page);
             page.setDirty(false);
+        } else {
+            log.debug("Evicting clean page {} from BufferPool", page.getPageId());
         }
     }
 }

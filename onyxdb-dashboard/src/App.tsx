@@ -1,16 +1,13 @@
 import { useEffect, useState } from 'react';
 
-interface ServerStats {
-  status: string;
-  uptime: number;
-}
+// Removed ServerStats to fix TypeScript error
 
 import VisualQueryBuilder from './VisualQueryBuilder';
 
 function App() {
   const [stats, setStats] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
-  const [query, setQuery] = useState('{"action": "select"}');
+  const [query, setQuery] = useState('{\n  "action": "select",\n  "table": "users"\n}');
   const [queryResult, setQueryResult] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'json' | 'visual'>('json');
