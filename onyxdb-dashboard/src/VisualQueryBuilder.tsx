@@ -51,7 +51,7 @@ export default function VisualQueryBuilder() {
       const response = await fetch(`${apiUrl}/api/query`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: "select" })
+        body: JSON.stringify({ action: "select", table: "users" })
       });
       const data = await response.json();
       setQueryResult(data);

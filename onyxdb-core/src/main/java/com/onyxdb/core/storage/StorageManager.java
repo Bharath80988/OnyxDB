@@ -6,11 +6,14 @@ import java.nio.channels.FileChannel;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Manages reading and writing Pages to the underlying data file using Java NIO.
  */
 public class StorageManager {
+    private static final Logger log = LoggerFactory.getLogger(StorageManager.class);
     private final Path filePath;
     private FileChannel fileChannel;
     private final AtomicInteger numPages;
@@ -24,6 +27,7 @@ public class StorageManager {
         
         long fileSize = fileChannel.size();
         this.numPages = new AtomicInteger((int) (fileSize / Page.PAGE_SIZE));
+        log.info("Initialized StorageManager for table file: {}. Loaded {} pages.", filePath, this.numPages.get());
     }
 
     /**
@@ -42,6 +46,7 @@ public class StorageManager {
             throw new IOException("Incomplete read of page " + pageId);
         }
 
+        log.debug("Read page {} from disk", pageId);
         return new Page(pageId, buffer.array());
     }
 
@@ -55,6 +60,7 @@ public class StorageManager {
         fileChannel.write(buffer, offset);
         fileChannel.force(false); // fsync
         page.setDirty(false);
+        log.debug("Wrote page {} to disk ({} bytes)", page.getPageId(), Page.PAGE_SIZE);
     }
 
     /**
@@ -64,6 +70,7 @@ public class StorageManager {
         int newPageId = numPages.getAndIncrement();
         Page newPage = new Page(newPageId);
         writePage(newPage);
+        log.info("Allocated new page {}", newPageId);
         return newPage;
     }
 

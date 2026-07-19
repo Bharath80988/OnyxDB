@@ -102,10 +102,11 @@ public class MyApp {
 OnyxDB uses a strict JSON structure for querying data via the API. You can execute these queries directly in the OnyxDB Dashboard Query Console.
 
 ### Insert Data
-To insert a new record, specify the action as "insert" and provide the data payload. The data must include a unique integer "id".
+To insert a new record, specify the action, the table name, and provide the data payload. The data must include a unique integer "id".
 ```json
 {
   "action": "insert",
+  "table": "users",
   "data": {
     "id": 1,
     "name": "Satoshi Nakamoto",
@@ -115,10 +116,11 @@ To insert a new record, specify the action as "insert" and provide the data payl
 ```
 
 ### Select Data
-To retrieve a record, specify the action as "select" and provide the target "id".
+To retrieve a record, specify the action and the table. Include an "id" for a point lookup, or omit it for a full table scan.
 ```json
 {
   "action": "select",
+  "table": "users",
   "id": 1
 }
 ```

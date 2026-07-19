@@ -7,11 +7,14 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Manages indexing and retrieval of data using a B+ Tree structure over 8KB Pages.
  */
 public class BTreeManager {
+    private static final Logger log = LoggerFactory.getLogger(BTreeManager.class);
     private final BufferPool bufferPool;
     private int rootPageId = 0;
     
@@ -102,10 +105,12 @@ public class BTreeManager {
         // Increment record count
         leafPage.writeInt(1, numRecords + 1);
         leafPage.setDirty(true);
+        log.debug("Inserted record id {} into page {}", id, leafPage.getPageId());
     }
 
     private void splitLeaf(Page oldLeaf, int newId, String newData) throws IOException {
         if (oldLeaf.getPageId() == rootPageId) {
+            log.info("Splitting root leaf node {} due to reaching max capacity ({})", rootPageId, MAX_LEAF_RECORDS);
             // Split the root leaf into two leaves, and make a new internal root
             Page leftLeaf = bufferPool.allocatePage();
             initLeafNode(leftLeaf);
