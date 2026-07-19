@@ -66,14 +66,14 @@ const DocsPage: React.FC = () => {
                 <div className="space-y-1">
                   <button 
                     onClick={() => scrollToSection('intro')}
-                    className={`w-full text-left px-4 py-2 rounded-lg text-sm transition-colors relative \${activeSection === 'intro' ? 'text-primary font-bold bg-primary/10' : 'text-gray-600 dark:text-onyx-100/70 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-onyx-700/50'}`}
+                    className={`w-full text-left px-4 py-2 rounded-lg text-sm transition-colors relative ${activeSection === 'intro' ? 'text-primary font-bold bg-primary/10' : 'text-gray-600 dark:text-onyx-100/70 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-onyx-700/50'}`}
                   >
                     {activeSection === 'intro' && <div className="absolute left-[-1px] top-1 bottom-1 w-[2px] bg-primary rounded-r-md" />}
                     Introduction
                   </button>
                   <button 
                     onClick={() => scrollToSection('philosophy')}
-                    className={`w-full text-left px-4 py-2 rounded-lg text-sm transition-colors relative \${activeSection === 'philosophy' ? 'text-primary font-bold bg-primary/10' : 'text-gray-600 dark:text-onyx-100/70 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-onyx-700/50'}`}
+                    className={`w-full text-left px-4 py-2 rounded-lg text-sm transition-colors relative ${activeSection === 'philosophy' ? 'text-primary font-bold bg-primary/10' : 'text-gray-600 dark:text-onyx-100/70 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-onyx-700/50'}`}
                   >
                     {activeSection === 'philosophy' && <div className="absolute left-[-1px] top-1 bottom-1 w-[2px] bg-primary rounded-r-md" />}
                     Philosophy & Architecture
