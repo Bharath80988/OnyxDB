@@ -13,7 +13,7 @@ export interface FrameworkDoc {
   chapters: Chapter[];
 }
 
-export const CodeBlock = ({ file, code, language = 'bash' }: { file: string, code: string, language?: string }) => (
+export const CodeBlock = ({ file, code }: { file: string, code: string }) => (
   <div className="bg-gray-100 dark:bg-onyx-900 border border-gray-200 dark:border-onyx-600/50 rounded-xl overflow-hidden my-6">
     <div className="bg-gray-200 dark:bg-onyx-800 px-4 py-3 text-xs font-bold text-gray-600 dark:text-onyx-100/70 border-b border-gray-300 dark:border-onyx-600/50 flex gap-2 items-center">
       {file.includes('.') ? (file.endsWith('.json') || file.endsWith('.xml') ? <FileJson className="w-4 h-4"/> : <Code2 className="w-4 h-4"/>) : <Terminal className="w-4 h-4"/>}

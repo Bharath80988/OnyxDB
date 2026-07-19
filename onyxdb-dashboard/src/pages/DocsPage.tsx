@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Terminal, Package, Server, Code2, Zap, FileJson, ChevronRight } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Package, Server, Code2, Zap, FileJson } from 'lucide-react';
 import { frameworks } from '../data/docsContent';
 import { motion } from 'framer-motion';
 
