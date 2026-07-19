@@ -1,5 +1,5 @@
 # Stage 1: Build the React Dashboard
-FROM node:18-alpine AS frontend-build
+FROM node:22-alpine AS frontend-build
 WORKDIR /app/frontend
 COPY onyxdb-dashboard/package.json onyxdb-dashboard/package-lock.json ./
 RUN npm install
