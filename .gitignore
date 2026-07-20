@@ -16,5 +16,3 @@ dist/
 *.ps1
 
 # Secrets
-.env
-.env.*
