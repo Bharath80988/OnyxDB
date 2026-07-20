@@ -1,0 +1,8 @@
+{
+  "action": "insert",
+  "table": "users",
+  "data": {
+    "id": 999,
+    "name": "CrashTest"
+  }
+}
