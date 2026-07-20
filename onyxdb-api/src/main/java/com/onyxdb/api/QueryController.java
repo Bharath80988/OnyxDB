@@ -15,9 +15,12 @@ public class QueryController {
 
     private final QueryService queryService;
     
-    // Static RBAC mapping for simplicity (in a real app, this would be a DB or JWT)
-    private static final String ADMIN_TOKEN = "Bearer admin-secret-key";
-    private static final String READ_ONLY_TOKEN = "Bearer readonly-secret-key";
+    // RBAC mapping (configurable via .env or application.properties)
+    @org.springframework.beans.factory.annotation.Value("${ADMIN_TOKEN:Bearer admin-secret-key}")
+    private String adminToken;
+    
+    @org.springframework.beans.factory.annotation.Value("${READ_ONLY_TOKEN:Bearer readonly-secret-key}")
+    private String readOnlyToken;
 
     public QueryController(QueryService queryService) {
         this.queryService = queryService;
@@ -31,14 +34,14 @@ public class QueryController {
         Map<String, Object> response = new HashMap<>();
         
         // RBAC Enforcement
-        if (authHeader == null || (!authHeader.equals(ADMIN_TOKEN) && !authHeader.equals(READ_ONLY_TOKEN))) {
+        if (authHeader == null || (!authHeader.equals(adminToken) && !authHeader.equals(readOnlyToken))) {
             response.put("status", "error");
             response.put("message", "Unauthorized: Missing or invalid Authorization header");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         }
 
         String action = (String) query.get("action");
-        if (action != null && action.equalsIgnoreCase("insert") && authHeader.equals(READ_ONLY_TOKEN)) {
+        if (action != null && action.equalsIgnoreCase("insert") && authHeader.equals(readOnlyToken)) {
             response.put("status", "error");
             response.put("message", "Forbidden: READ_ONLY role cannot perform inserts");
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
