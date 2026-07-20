@@ -1,0 +1,2 @@
+[console_scripts]
+onyxdb = onyxdb.cli:main

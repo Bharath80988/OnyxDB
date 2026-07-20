@@ -1,0 +1,10 @@
+README.md
+setup.py
+onyxdb/__init__.py
+onyxdb/cli.py
+onyxdb.egg-info/PKG-INFO
+onyxdb.egg-info/SOURCES.txt
+onyxdb.egg-info/dependency_links.txt
+onyxdb.egg-info/entry_points.txt
+onyxdb.egg-info/requires.txt
+onyxdb.egg-info/top_level.txt
