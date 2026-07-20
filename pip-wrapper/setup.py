@@ -8,7 +8,7 @@ with open(os.path.join(os.path.dirname(__file__), "README.md"), "r", encoding="u
 
 setup(
     name='onyxdb',
-    version='0.1.2',
+    version='0.1.3',
     description='The Multi-Table Omni-Channel Database built on B+ Trees.',
     long_description=long_description,
     long_description_content_type='text/markdown',

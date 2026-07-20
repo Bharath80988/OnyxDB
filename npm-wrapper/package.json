@@ -1,6 +1,6 @@
 {
   "name": "onyxdb",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "The Multi-Table Omni-Channel Database built on B+ Trees.",
   "main": "index.js",
   "bin": {

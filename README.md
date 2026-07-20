@@ -72,7 +72,7 @@ You can pull the pure Java engine (`onyxdb-core`) or the full API directly from 
 <dependency>
     <groupId>com.github.Bharath80988</groupId>
     <artifactId>OnyxDB</artifactId>
-    <version>v0.1.0</version>
+    <version>v0.1.3</version>
 </dependency>
 ```
 
@@ -82,7 +82,7 @@ If you want to modify the database:
 git clone https://github.com/Bharath80988/OnyxDB.git
 cd OnyxDB
 mvn clean package -DskipTests
-java -jar onyxdb-api/target/onyxdb-api-0.1.0-SNAPSHOT.jar
+java -jar onyxdb-api/target/onyxdb-api-0.1.3.jar
 ```
 *Note: OnyxDB now statically bundles the React dashboard directly inside the Java `.jar` file!*
 

@@ -5,9 +5,9 @@ const path = require('path');
 const { spawn, execSync } = require('child_process');
 const axios = require('axios');
 
-const JAR_NAME = 'onyxdb-api-0.1.0-SNAPSHOT.jar';
+const JAR_NAME = 'onyxdb-api-0.1.3.jar';
 const JAR_PATH = path.join(__dirname, JAR_NAME);
-const DOWNLOAD_URL = `https://github.com/Bharath80988/OnyxDB/releases/download/v0.1.0/${JAR_NAME}`;
+const DOWNLOAD_URL = `https://github.com/Bharath80988/OnyxDB/releases/download/v0.1.3/${JAR_NAME}`;
 
 async function downloadJar() {
     console.log(`Downloading OnyxDB engine from ${DOWNLOAD_URL}...`);

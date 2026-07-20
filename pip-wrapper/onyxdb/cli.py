@@ -3,9 +3,9 @@ import sys
 import subprocess
 import requests
 
-JAR_NAME = 'onyxdb-api-0.1.0-SNAPSHOT.jar'
+JAR_NAME = 'onyxdb-api-0.1.3.jar'
 JAR_PATH = os.path.join(os.path.dirname(__file__), JAR_NAME)
-DOWNLOAD_URL = f"https://github.com/Bharath80988/OnyxDB/releases/download/v0.1.0/{JAR_NAME}"
+DOWNLOAD_URL = f"https://github.com/Bharath80988/OnyxDB/releases/download/v0.1.3/{JAR_NAME}"
 
 def download_jar():
     print(f"Downloading OnyxDB engine from {DOWNLOAD_URL}...")
