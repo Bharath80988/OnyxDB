@@ -24,7 +24,7 @@ COPY onyxdb-api/src onyxdb-api/src
 COPY --from=frontend-build /app/frontend/dist /app/backend/onyxdb-api/src/main/resources/static/
 
 # Build the Spring Boot executable jar
-RUN mvn clean package -DskipTests
+RUN mvn clean package -DskipTests -Dskip.frontend=true
 
 # Stage 3: Create the final minimal production image
 FROM eclipse-temurin:21-jre-alpine

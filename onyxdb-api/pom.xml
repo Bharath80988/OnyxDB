@@ -11,6 +11,10 @@
 
     <artifactId>onyxdb-api</artifactId>
 
+    <properties>
+        <skip.frontend>false</skip.frontend>
+    </properties>
+
     <dependencies>
         <!-- Dependency on Core Engine -->
         <dependency>
@@ -52,6 +56,7 @@
                 <configuration>
                     <workingDirectory>../onyxdb-dashboard</workingDirectory>
                     <nodeVersion>v22.2.0</nodeVersion>
+                    <skip>${skip.frontend}</skip>
                 </configuration>
                 <executions>
                     <execution>
