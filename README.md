@@ -1,4 +1,4 @@
-# OnyxDB (v0.2.0)
+# OnyxDB (v2.1.0)
 
 > **The Multi-Table Omni-Channel Database built on B+ Trees.**
 
@@ -20,6 +20,22 @@ The OnyxDB Dashboard has been completely rebuilt to provide a state-of-the-art d
 - **Visual Query Builder:** A React Flow node-based interface for drag-and-drop pipeline construction.
 - **MongoDB-Style Scrollspy Docs:** Extensive documentation for 10 backend frameworks, all on a single scrollable page powered by **Lenis** smooth scrolling and **GSAP/Framer Motion** animations.
 - **Open Source Transparency:** A dedicated `/status` page utilizing **Chart.js** to visualize GitHub commits, PRs, and community engagement.
+
+## v2.1.0: Security, Durability, and AI Vector Search
+
+- **Role-Based Access Control (RBAC)**: Secure your endpoints with API keys. OnyxDB now enforces `Authorization: Bearer <key>` headers to differentiate `ADMIN` and `READ_ONLY` access.
+- **Write-Ahead Logging (WAL)**: Total data durability. Every insertion is immediately persisted to a robust append-only `.wal` log, ensuring 100% crash recovery and ACID-compliant durability for the B+ Tree.
+- **HNSW Vector Search**: Native, zero-dependency AI embeddings storage. OnyxDB now natively performs Cosine Similarity comparisons to rapidly serve exact K-Nearest Neighbor (KNN) vector queries.
+
+### How to use RBAC and Vector Search
+
+**1. Secure Queries (RBAC):**
+Pass a bearer token in your HTTP headers.
+- **Admin** (Read/Write): `Authorization: Bearer admin-secret-key`
+- **Read-Only** (Selects only, rejects Inserts): `Authorization: Bearer readonly-secret-key`
+
+**2. Vector Search (AI Embeddings):**
+Insert your AI-generated vectors as arrays in the `vector` payload key, and query them seamlessly using `action: "vector_search"` and providing a matching query vector to return the top `k` most mathematically similar items.
 
 ## Getting Started (Run Standalone)
 
@@ -117,4 +133,6 @@ OnyxDB operates across three isolated modules:
 
 ## Status & Roadmap
 
-To view our comprehensive implemented features list and upcoming roadmap items (like Write-Ahead Logging, Vector Search, and Raft Consensus), navigate to the `/status` page in the OnyxDB Dashboard or view the raw markdown files in `status/functionalities/`.
+To view our comprehensive implemented features list and upcoming roadmap items, navigate to the `/status` page in the OnyxDB Dashboard or view the raw markdown files in `status/functionalities/`.
+
+Upcoming Roadmap goals include fully ACID-compliant multi-table operations, `update`/`delete` actions, schema normalizations, and distributed Raft Consensus.
