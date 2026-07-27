@@ -21,6 +21,9 @@ OnyxDB has achieved a massive feature set for its v0.2.0 release. Below is a com
 
 ## Operations
 - **Insert / Upsert**: Automatically handles duplicate keys by overwriting existing records.
+- **Update**: In-place payload modification in B+ Tree leaf pages with $O(\log N)$ binary search lookup.
+- **Delete**: Record removal with memory slot shifting (`System.arraycopy`) and $O(\log N)$ binary search lookup.
+- **Binary Search Acceleration**: $O(\log N)$ point lookups across B+ Tree leaf nodes.
 - **Select by ID**: O(1) to O(log n) lookups using primary keys.
 - **Vector Search**: Computes distance metrics on high-dimensional arrays.
 - **Full Table Scans**: Sequential iteration over leaf nodes for unindexed queries.

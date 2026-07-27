@@ -21,20 +21,39 @@ The OnyxDB Dashboard has been completely rebuilt to provide a state-of-the-art d
 - **MongoDB-Style Scrollspy Docs:** Extensive documentation for 10 backend frameworks, all on a single scrollable page powered by **Lenis** smooth scrolling and **GSAP/Framer Motion** animations.
 - **Open Source Transparency:** A dedicated `/status` page utilizing **Chart.js** to visualize GitHub commits, PRs, and community engagement.
 
-## v2.1.0: Security, Durability, and AI Vector Search
+## v2.3.0: B+ Tree Update/Delete & Binary Search Acceleration
 
-- **Role-Based Access Control (RBAC)**: Secure your endpoints with API keys. OnyxDB now enforces `Authorization: Bearer <key>` headers to differentiate `ADMIN` and `READ_ONLY` access.
-- **Write-Ahead Logging (WAL)**: Total data durability. Every insertion is immediately persisted to a robust append-only `.wal` log, ensuring 100% crash recovery and ACID-compliant durability for the B+ Tree.
-- **HNSW Vector Search**: Native, zero-dependency AI embeddings storage. OnyxDB now natively performs Cosine Similarity comparisons to rapidly serve exact K-Nearest Neighbor (KNN) vector queries.
+- **Update & Delete Operations**: Full mutative and destructive capabilities across B+ Tree storage pages.
+- **Binary Search Acceleration**: Leaf page searches utilize $O(\log N)$ binary search indexing over 256-byte page slots.
+- **WAL Durability**: `UPDATE` and `DELETE` events write append-only logs for 100% crash recovery.
+- **RBAC Security Guard**: Restricts mutative and destructive operations to `ADMIN` Bearer tokens.
 
-### How to use RBAC and Vector Search
+### How to use Query Actions (Insert, Select, Update, Delete, Vector Search)
 
 **1. Secure Queries (RBAC):**
 Pass a bearer token in your HTTP headers.
-- **Admin** (Read/Write): `Authorization: Bearer admin-secret-key`
-- **Read-Only** (Selects only, rejects Inserts): `Authorization: Bearer readonly-secret-key`
+- **Admin** (Read/Write/Update/Delete): `Authorization: Bearer admin-secret-key`
+- **Read-Only** (Selects only, rejects Inserts/Updates/Deletes): `Authorization: Bearer readonly-secret-key`
 
-**2. Vector Search (AI Embeddings):**
+**2. Update Record:**
+```json
+{
+  "action": "update",
+  "table": "users",
+  "data": { "id": 1, "name": "Satoshi Nakamoto", "role": "founder" }
+}
+```
+
+**3. Delete Record:**
+```json
+{
+  "action": "delete",
+  "table": "users",
+  "id": 1
+}
+```
+
+**4. Vector Search (AI Embeddings):**
 Insert your AI-generated vectors as arrays in the `vector` payload key, and query them seamlessly using `action: "vector_search"` and providing a matching query vector to return the top `k` most mathematically similar items.
 
 ## Getting Started

@@ -4,7 +4,7 @@ The journey for OnyxDB is just beginning. Below is our exhaustive roadmap for up
 
 ## High Priority To-Do
 - [x] **Write-Ahead Logging (WAL)**: Implement an append-only WAL to guarantee ACID durability in the event of unexpected power failures.
-- [ ] **Update & Delete**: Add robust mutative and destructive B+ Tree operations.
+- [x] **Update & Delete**: Add robust mutative and destructive B+ Tree operations with $O(\log N)$ binary search node indexing.
 - [ ] **Schema Normalization**: Implement cross-table relational links (Foreign Keys) and normal forms (1NF, 2NF, 3NF) for structured data mapping.
 - [ ] **Secondary Indexes**: Extend the B+ Tree architecture to support non-primary key indexing.
 - [ ] **Transaction Isolation**: Introduce Multiversion Concurrency Control (MVCC) for Snapshot Isolation without locking reads (ACID Isolation).

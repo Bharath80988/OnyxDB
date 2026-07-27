@@ -23,9 +23,9 @@ public class QueryService {
         return executionEngine.execute(query);
     }
 
-    // Clear the cache whenever an INSERT query is executed, as the table data changes
+    // Clear the cache whenever a mutative query (INSERT, UPDATE, DELETE) is executed
     @CacheEvict(value = "queries", allEntries = true)
-    public List<String> executeInsert(Map<String, Object> query) throws Exception {
+    public List<String> executeMutative(Map<String, Object> query) throws Exception {
         return executionEngine.execute(query);
     }
 
@@ -33,8 +33,8 @@ public class QueryService {
         String action = (String) query.get("action");
         if ("select".equalsIgnoreCase(action)) {
             return executeSelect(query);
-        } else if ("insert".equalsIgnoreCase(action)) {
-            return executeInsert(query);
+        } else if ("insert".equalsIgnoreCase(action) || "update".equalsIgnoreCase(action) || "delete".equalsIgnoreCase(action)) {
+            return executeMutative(query);
         } else {
             return executionEngine.execute(query);
         }

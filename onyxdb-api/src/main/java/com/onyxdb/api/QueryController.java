@@ -41,9 +41,9 @@ public class QueryController {
         }
 
         String action = (String) query.get("action");
-        if (action != null && action.equalsIgnoreCase("insert") && authHeader.equals(readOnlyToken)) {
+        if (action != null && (action.equalsIgnoreCase("insert") || action.equalsIgnoreCase("update") || action.equalsIgnoreCase("delete")) && authHeader.equals(readOnlyToken)) {
             response.put("status", "error");
-            response.put("message", "Forbidden: READ_ONLY role cannot perform inserts");
+            response.put("message", "Forbidden: READ_ONLY role cannot perform mutative or destructive operations");
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
         }
 

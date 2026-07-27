@@ -58,20 +58,30 @@ public class ExecutionEngine {
                     log.info("Recovering {} entries from WAL for table '{}'", logs.size(), name);
                     for (byte[] logEntry : logs) {
                         String entry = new String(logEntry, StandardCharsets.UTF_8);
-                        String[] parts = entry.split(":", 2);
-                        if (parts.length == 2) {
-                            try {
-                                int id = Integer.parseInt(parts[0]);
-                                btree.insert(id, parts[1]);
-                                
-                                // Recover vector if it existed (simplistic string parse)
-                                if (parts[1].contains("vector=")) {
-                                    // Complex JSON parsing skipped for brevity in recovery
-                                    log.debug("Skipped vector recovery for id {}", id);
+                        try {
+                            if (entry.startsWith("UPDATE:")) {
+                                String[] parts = entry.substring(7).split(":", 2);
+                                if (parts.length == 2) {
+                                    int id = Integer.parseInt(parts[0]);
+                                    btree.update(id, parts[1]);
                                 }
-                            } catch (Exception e) {
-                                log.error("Failed to recover WAL entry: {}", entry, e);
+                            } else if (entry.startsWith("DELETE:")) {
+                                int id = Integer.parseInt(entry.substring(7).trim());
+                                btree.delete(id);
+                            } else {
+                                String[] parts = entry.split(":", 2);
+                                if (parts.length == 2) {
+                                    int id = Integer.parseInt(parts[0]);
+                                    btree.insert(id, parts[1]);
+                                    
+                                    // Recover vector if it existed (simplistic string parse)
+                                    if (parts[1].contains("vector=")) {
+                                        log.debug("Skipped vector recovery for id {}", id);
+                                    }
+                                }
                             }
+                        } catch (Exception e) {
+                            log.error("Failed to recover WAL entry: {}", entry, e);
                         }
                     }
                     log.info("Crash recovery complete for table '{}'", name);
@@ -102,6 +112,10 @@ public class ExecutionEngine {
         switch (action.toLowerCase()) {
             case "insert":
                 return executeInsert(table, db, queryNode);
+            case "update":
+                return executeUpdate(table, db, queryNode);
+            case "delete":
+                return executeDelete(table, db, queryNode);
             case "select":
                 return executeSelect(db, queryNode);
             case "vector_search":
@@ -142,6 +156,57 @@ public class ExecutionEngine {
         
         log.info("Inserted record id {} successfully", id);
         return Collections.singletonList("Inserted 1 row.");
+    }
+
+    private List<String> executeUpdate(String tableName, BTreeManager db, Map<String, Object> queryNode) throws IOException {
+        Map<String, Object> data = (Map<String, Object>) queryNode.get("data");
+        if (data == null || !data.containsKey("id")) {
+            throw new IllegalArgumentException("Update data must contain an 'id'");
+        }
+        
+        int id = (Integer) data.get("id");
+        String value = data.toString();
+        
+        WriteAheadLog wal = wals.get(tableName);
+        if (wal != null) {
+            String walEntry = "UPDATE:" + id + ":" + value;
+            wal.append(walEntry.getBytes(StandardCharsets.UTF_8));
+        }
+        
+        boolean updated = db.update(id, value);
+        if (updated) {
+            log.info("Updated record id {} successfully in table '{}'", id, tableName);
+            return Collections.singletonList("Updated 1 row.");
+        } else {
+            log.warn("Record id {} not found for update in table '{}'", id, tableName);
+            return Collections.singletonList("0 rows updated (record not found).");
+        }
+    }
+
+    private List<String> executeDelete(String tableName, BTreeManager db, Map<String, Object> queryNode) throws IOException {
+        int id;
+        if (queryNode.containsKey("id")) {
+            id = (Integer) queryNode.get("id");
+        } else if (queryNode.containsKey("data") && ((Map<String, Object>) queryNode.get("data")).containsKey("id")) {
+            id = (Integer) ((Map<String, Object>) queryNode.get("data")).get("id");
+        } else {
+            throw new IllegalArgumentException("Delete query must specify an 'id'");
+        }
+        
+        WriteAheadLog wal = wals.get(tableName);
+        if (wal != null) {
+            String walEntry = "DELETE:" + id;
+            wal.append(walEntry.getBytes(StandardCharsets.UTF_8));
+        }
+        
+        boolean deleted = db.delete(id);
+        if (deleted) {
+            log.info("Deleted record id {} successfully from table '{}'", id, tableName);
+            return Collections.singletonList("Deleted 1 row.");
+        } else {
+            log.warn("Record id {} not found for delete in table '{}'", id, tableName);
+            return Collections.singletonList("0 rows deleted (record not found).");
+        }
     }
 
     private List<String> executeSelect(BTreeManager db, Map<String, Object> queryNode) throws IOException {
