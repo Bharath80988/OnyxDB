@@ -8,8 +8,3 @@
 - **Orchestration:** Created `docker-compose.yml` to run OnyxDB alongside a Redis cache container and a Celery worker template.
 - **CI/CD Automation:** Set up a GitHub Actions pipeline (`.github/workflows/ci.yml`) to automatically build and test the codebase on every push.
 - **JitPack Documentation:** Added instructions in the `README.md` for Java developers to embed the pure `onyxdb-core` B+ Tree engine into their own applications.
-
-## Next Steps
-- Implement Python Celery workers for heavy asynchronous background jobs.
-- Expand the Visual Node Builder with more complex node types (e.g., Joins, Aggregations).
-- Optimize concurrent read/write locking using `ReentrantReadWriteLock` in the B+ Tree.
