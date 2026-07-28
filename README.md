@@ -1,4 +1,4 @@
-# OnyxDB (v2.1.0)
+# OnyxDB (v2.4.0)
 
 > **The Multi-Table Omni-Channel Database built on B+ Trees.**
 
@@ -12,39 +12,72 @@ Unlike traditional RDBMS systems that require heavy installations, background se
 - **Visual Transparency:** The out-of-the-box Dashboard visually shows you exactly what the B+ Tree, Buffer Pool, and Write-Ahead Log are doing in real-time.
 - **Zero Configuration:** Click, start, and query. No `pg_hba.conf`, no user creation scripts, no socket configuration.
 - **Multi-Table Dynamic Routing:** Automatically routes JSON payloads to independent B+ Trees on the fly.
+- **Secondary B+ Tree Indexing:** Non-primary key queries execute in $O(\log N)$ time with automatic index synchronization.
 
-## v0.2.0 Frontend Overhaul
+## Release Highlights
 
-The OnyxDB Dashboard has been completely rebuilt to provide a state-of-the-art developer experience:
-- **10 Dynamic Themes:** Toggle between Light, Dark, Purple, Ocean, Forest, Sunset, Rose, Midnight, Coffee, and Mint instantly via DaisyUI CSS variables.
-- **Visual Query Builder:** A React Flow node-based interface for drag-and-drop pipeline construction.
-- **MongoDB-Style Scrollspy Docs:** Extensive documentation for 10 backend frameworks, all on a single scrollable page powered by **Lenis** smooth scrolling and **GSAP/Framer Motion** animations.
-- **Open Source Transparency:** A dedicated `/status` page utilizing **Chart.js** to visualize GitHub commits, PRs, and community engagement.
+### v2.4.0: Secondary B+ Tree Indexing & Query Acceleration
+- **Secondary Index Engine (`SecondaryBTreeIndex.java`)**: Maps secondary string attribute values (e.g. `email`, `role`, `status`) to primary key integer record IDs (`id`).
+- **Dynamic Index Creation (`create_index`)**: Easily create indexes over existing B+ Tree record pages on demand.
+- **Automated Index Maintenance**: `insert`, `update`, and `delete` operations automatically synchronize registered secondary indexes.
+- **Index Scan Query Routing**: `select` queries with `"where"` filters transparently execute Secondary Index Scans in $O(\log N)$ time, avoiding full table scans.
+- **RBAC Protection**: Administrative `create_index` actions are protected with `ADMIN` Bearer tokens.
 
-## v2.3.0: B+ Tree Update/Delete & Binary Search Acceleration
-
-- **Update & Delete Operations**: Full mutative and destructive capabilities across B+ Tree storage pages.
+### v2.3.0: B+ Tree Update/Delete & Binary Search Acceleration
+- **Update & Delete Operations**: In-place modifications and slot-shifting deletions.
 - **Binary Search Acceleration**: Leaf page searches utilize $O(\log N)$ binary search indexing over 256-byte page slots.
-- **WAL Durability**: `UPDATE` and `DELETE` events write append-only logs for 100% crash recovery.
-- **RBAC Security Guard**: Restricts mutative and destructive operations to `ADMIN` Bearer tokens.
+- **WAL Durability**: Append-only durability logging for crash recovery.
+- **RBAC Security Guard**: Restricts mutative and administrative operations to `ADMIN` Bearer tokens.
 
-### How to use Query Actions (Insert, Select, Update, Delete, Vector Search)
+---
 
-**1. Secure Queries (RBAC):**
-Pass a bearer token in your HTTP headers.
-- **Admin** (Read/Write/Update/Delete): `Authorization: Bearer admin-secret-key`
-- **Read-Only** (Selects only, rejects Inserts/Updates/Deletes): `Authorization: Bearer readonly-secret-key`
+## ⚡ What OnyxDB Can Do & How To Use It
 
-**2. Update Record:**
+OnyxDB processes queries over standard HTTP `POST` requests to `http://localhost:8080/api/query`.
+
+### 1. Authentication (RBAC)
+Include the appropriate `Authorization` header with your requests:
+- **Admin Role** (Full access: Insert, Update, Delete, Select, Create Index):
+  `Authorization: Bearer admin-secret-key`
+- **Read-Only Role** (Selects only, rejects mutations):
+  `Authorization: Bearer readonly-secret-key`
+
+---
+
+### 2. Supported Query Actions
+
+#### **A. Insert / Upsert Record**
+Inserts a record into the target table (dynamically creating `<table_name>.db` if it doesn't exist).
+```json
+{
+  "action": "insert",
+  "table": "users",
+  "data": {
+    "id": 1,
+    "name": "Satoshi Nakamoto",
+    "email": "satoshi@bitcoin.org",
+    "role": "admin"
+  }
+}
+```
+
+#### **B. Update Record**
+Modifies an existing record in place inside the B+ Tree page.
 ```json
 {
   "action": "update",
   "table": "users",
-  "data": { "id": 1, "name": "Satoshi Nakamoto", "role": "founder" }
+  "data": {
+    "id": 1,
+    "name": "Satoshi Nakamoto",
+    "email": "satoshi@bitcoin.org",
+    "role": "founder"
+  }
 }
 ```
 
-**3. Delete Record:**
+#### **C. Delete Record**
+Removes a record from B+ Tree leaf pages and shifts slot memory.
 ```json
 {
   "action": "delete",
@@ -53,40 +86,64 @@ Pass a bearer token in your HTTP headers.
 }
 ```
 
-**4. Vector Search (AI Embeddings):**
-Insert your AI-generated vectors as arrays in the `vector` payload key, and query them seamlessly using `action: "vector_search"` and providing a matching query vector to return the top `k` most mathematically similar items.
+#### **D. Point Select by Primary Key ($O(\log N)$)**
+Fast binary search lookup by primary key `id`.
+```json
+{
+  "action": "select",
+  "table": "users",
+  "id": 1
+}
+```
+
+#### **E. Create Secondary Index ($O(\log N)$ Lookups on Non-Primary Keys)**
+Builds a secondary index on a specific field (e.g. `email`).
+```json
+{
+  "action": "create_index",
+  "table": "users",
+  "field": "email"
+}
+```
+
+#### **F. Select by Secondary Index ($O(\log N)$ Index Scan)**
+Retrieves records matching secondary attribute values via Secondary Index Scan without scanning the entire table.
+```json
+{
+  "action": "select",
+  "table": "users",
+  "where": { "email": "satoshi@bitcoin.org" }
+}
+```
+
+#### **G. Vector Search (AI KNN Cosine Similarity)**
+Insert vector arrays in your payload and query top `k` mathematically similar items:
+```json
+{
+  "action": "vector_search",
+  "table": "products",
+  "vector": [0.12, 0.85, 0.43, -0.21],
+  "k": 5
+}
+```
+
+---
 
 ## Getting Started
 
-You can run OnyxDB instantly from your terminal without downloading any source code!
-
 ### 1. Node.js (NPM)
-If you have Node.js installed, you can launch the database globally:
 ```bash
 npx onyxdb
 ```
 
 ### 2. Python (Pip)
-If you are a Python developer, install it via Pip:
 ```bash
 pip install onyxdb
 onyxdb
 ```
 
 ### 3. Java (JitPack)
-You can pull the pure Java engine (`onyxdb-core`) or the full API directly from GitHub into your project using **JitPack**.
-
-**1. Add the JitPack repository to your `pom.xml`:**
-```xml
-<repositories>
-    <repository>
-        <id>jitpack.io</id>
-        <url>https://jitpack.io</url>
-    </repository>
-</repositories>
-```
-
-**2. Add the OnyxDB dependency:**
+Add JitPack dependency to `pom.xml`:
 ```xml
 <dependency>
     <groupId>com.github.Bharath80988</groupId>
@@ -96,41 +153,23 @@ You can pull the pure Java engine (`onyxdb-core`) or the full API directly from 
 ```
 
 ### 4. Build from Source
-If you want to modify the database:
 ```bash
 git clone https://github.com/Bharath80988/OnyxDB.git
 cd OnyxDB
-mvn clean package -DskipTests
+.\maven-bin\apache-maven-3.9.6\bin\mvn.cmd clean package -DskipTests
 java -jar onyxdb-api/target/onyxdb-api-0.1.3.jar
 ```
-*Note: OnyxDB now statically bundles the React dashboard directly inside the Java `.jar` file!*
+*Note: OnyxDB statically bundles the React dashboard directly inside the Java `.jar` file!*
 
-**3. Use it in your code:**
-```java
-import com.onyxdb.core.storage.StorageManager;
-import com.onyxdb.core.index.BTreeManager;
-import java.nio.file.Path;
-
-public class MyApp {
-    public static void main(String[] args) throws Exception {
-        StorageManager storage = new StorageManager(Path.of("my-database.db"));
-        BTreeManager db = new BTreeManager(storage);
-        
-        db.insert(1, "{\"name\": \"Satoshi\"}");
-        System.out.println(db.search(1));
-    }
-}
-```
+---
 
 ## Architecture
 
 OnyxDB operates across three isolated modules:
-- `onyxdb-core`: The pure Java 21 storage and execution engine. Contains the Page Manager, B+ Tree logic, and WAL.
-- `onyxdb-api`: The Spring Boot management layer that exposes the REST API.
-- `onyxdb-dashboard`: The React/Tailwind frontend for observability, featuring a Visual Query Builder and 10 dynamic themes.
+- `onyxdb-core`: Java 21 storage engine with Page Manager, B+ Tree primary & secondary indexes, Vector HNSW search, and WAL crash recovery.
+- `onyxdb-api`: Spring Boot REST API layer handling query dispatching, RBAC authentication, and caching.
+- `onyxdb-dashboard`: React + Vite UI featuring Visual Query Builder, real-time telemetry metrics, and 10 dynamic themes.
 
 ## Status & Roadmap
 
-To view our comprehensive implemented features list and upcoming roadmap items, navigate to the `/status` page in the OnyxDB Dashboard or view the raw markdown files in `status/functionalities/`.
-
-Upcoming Roadmap goals include fully ACID-compliant multi-table operations, `update`/`delete` actions, schema normalizations, and distributed Raft Consensus.
+To view our comprehensive implemented features list and upcoming roadmap items, navigate to the `/status` page in the OnyxDB Dashboard or view `status/functionalities/roadmap.md`.

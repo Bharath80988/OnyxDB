@@ -8,6 +8,7 @@ OnyxDB has achieved a massive feature set for its v0.2.0 release. Below is a com
 - **Disk-Backed Paging**: Data is persisted to disk in 8KB pages to maximize OS-level cache hits.
 - **Buffer Pool Manager (LRU)**: An intelligent in-memory cache that evicts least-recently-used pages to prevent out-of-memory errors on massive datasets.
 - **Slotted Pages**: Dynamic record sizing within a single page, preventing internal fragmentation.
+- **Secondary B+ Tree Indexing**: $O(\log N)$ non-primary key lookups across dynamic JSON record attributes with automated mutation synchronization.
 
 ## Vector Search (AI)
 - **HNSW Vector Storage**: Native AI embedding storage designed as a foundation for Navigable Small World graphs.
