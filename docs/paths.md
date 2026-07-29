@@ -50,14 +50,11 @@ This document defines the purpose, contents, and usage of every major path in th
 
 ---
 
-## 📜 Documentation & Version Archiving Directories
+## 📜 Documentation & Version Archiving Directories (`docs/`)
 
-### 7. `logs/`
+### 7. `docs/logs/`
 * **Purpose:** Release log directory detailing feature releases from v0.1.0 to v2.4.0.
 
-### 8. `status/`
-* **Purpose:** Active architecture and feature status tracking.
-
-### 9. `versions/`
+### 8. `docs/versions/`
 * **Purpose:** Archival directory for legacy prototype iterations, keeping production clean.
-  - [`versions/v1_prototype/`](file:///d:/db/versions/v1_prototype/): Archived prototype files and daily development logs.
+  - [`docs/versions/v1_prototype/`](./versions/v1_prototype/): Archived prototype files and daily development logs.

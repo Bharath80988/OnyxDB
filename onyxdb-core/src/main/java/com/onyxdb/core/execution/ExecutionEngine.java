@@ -3,6 +3,8 @@ package com.onyxdb.core.execution;
 import com.onyxdb.core.index.BTreeManager;
 import com.onyxdb.core.index.SecondaryBTreeIndex;
 import com.onyxdb.core.index.hnsw.HnswIndex;
+import com.onyxdb.core.schema.ForeignKeyConstraint;
+import com.onyxdb.core.schema.SchemaManager;
 import com.onyxdb.core.storage.BufferPool;
 import com.onyxdb.core.storage.StorageManager;
 import com.onyxdb.core.wal.WriteAheadLog;
@@ -12,14 +14,12 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Parses and executes structured JSON queries across multiple tables with support for B+ Tree Primary & Secondary Indexing.
+ * Parses and executes structured JSON queries across multiple tables with support for
+ * Primary B+ Trees, Secondary Indexing, AI Vector Search, and Foreign Key Schema Normalization.
  */
 public class ExecutionEngine {
     private static final Logger log = LoggerFactory.getLogger(ExecutionEngine.class);
@@ -28,10 +28,16 @@ public class ExecutionEngine {
     private final ConcurrentHashMap<String, WriteAheadLog> wals = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, HnswIndex> vectorIndexes = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, ConcurrentHashMap<String, SecondaryBTreeIndex>> secondaryIndexes = new ConcurrentHashMap<>();
+    private final SchemaManager schemaManager;
 
     public ExecutionEngine(Path storageDir) {
         this.storageDir = storageDir;
+        this.schemaManager = new SchemaManager(storageDir);
         log.info("ExecutionEngine initialized with storage directory: {}", storageDir);
+    }
+
+    public SchemaManager getSchemaManager() {
+        return schemaManager;
     }
 
     private BTreeManager getTable(String tableName) {
@@ -120,9 +126,44 @@ public class ExecutionEngine {
                 return executeCreateIndex(table, db, queryNode);
             case "vector_search":
                 return executeVectorSearch(table, db, queryNode);
+            case "create_foreign_key":
+            case "add_foreign_key":
+                return executeCreateForeignKey(table, queryNode);
             default:
                 throw new UnsupportedOperationException("Action '" + action + "' is not supported.");
         }
+    }
+
+    private List<String> executeCreateForeignKey(String tableName, Map<String, Object> queryNode) {
+        String childField = (String) queryNode.get("field");
+        if (childField == null && queryNode.containsKey("child_field")) {
+            childField = (String) queryNode.get("child_field");
+        }
+        String parentTable = (String) queryNode.get("parent_table");
+        if (parentTable == null && queryNode.containsKey("referenced_table")) {
+            parentTable = (String) queryNode.get("referenced_table");
+        }
+        String parentField = (String) queryNode.get("parent_field");
+        if (parentField == null && queryNode.containsKey("referenced_field")) {
+            parentField = (String) queryNode.get("referenced_field");
+        }
+        if (parentField == null) {
+            parentField = "id";
+        }
+        String onDeleteStr = (String) queryNode.get("on_delete");
+        ForeignKeyConstraint.OnDeleteAction onDelete = ForeignKeyConstraint.OnDeleteAction.RESTRICT;
+        if (onDeleteStr != null && onDeleteStr.equalsIgnoreCase("CASCADE")) {
+            onDelete = ForeignKeyConstraint.OnDeleteAction.CASCADE;
+        }
+
+        if (childField == null || parentTable == null) {
+            throw new IllegalArgumentException("create_foreign_key requires 'field' (or 'child_field') and 'parent_table'");
+        }
+
+        ForeignKeyConstraint constraint = new ForeignKeyConstraint(tableName, childField, parentTable, parentField, onDelete);
+        schemaManager.addForeignKey(constraint);
+        
+        return Collections.singletonList("Created Foreign Key constraint on '" + tableName + "." + childField + "' referencing '" + parentTable + "." + parentField + "' (" + onDelete + ").");
     }
 
     private List<String> executeCreateIndex(String tableName, BTreeManager db, Map<String, Object> queryNode) throws IOException {
@@ -135,7 +176,6 @@ public class ExecutionEngine {
         SecondaryBTreeIndex secIndex = tableIndexes.computeIfAbsent(field, SecondaryBTreeIndex::new);
         secIndex.clear();
 
-        // Populate index from existing records in primary B+ Tree
         List<String> records = db.scanAll();
         int indexedCount = 0;
         for (String record : records) {
@@ -151,7 +191,7 @@ public class ExecutionEngine {
         return Collections.singletonList("Created secondary index on field '" + field + "' for table '" + tableName + "' (" + indexedCount + " records indexed).");
     }
 
-    private List<String> executeInsert(String tableName, BTreeManager db, Map<String, Object> queryNode) throws IOException {
+    private List<String> executeInsert(String tableName, BTreeManager db, Map<String, Object> queryNode) throws Exception {
         Map<String, Object> data = (Map<String, Object>) queryNode.get("data");
         if (data == null || !data.containsKey("id")) {
             throw new IllegalArgumentException("Insert data must contain an 'id'");
@@ -159,6 +199,37 @@ public class ExecutionEngine {
         
         int id = (Integer) data.get("id");
         String value = data.toString();
+
+        // Enforce Foreign Key Constraints for child table insertions
+        List<ForeignKeyConstraint> childFks = schemaManager.getChildConstraints(tableName);
+        for (ForeignKeyConstraint fk : childFks) {
+            Object childValObj = data.get(fk.getChildField());
+            if (childValObj != null) {
+                String parentValStr = childValObj.toString();
+                try {
+                    int parentId = Integer.parseInt(parentValStr);
+                    BTreeManager parentDb = getTable(fk.getParentTable());
+                    String parentRecord = parentDb.search(parentId);
+                    if (parentRecord == null) {
+                        throw new IllegalStateException("Foreign Key constraint violation: Referenced record id " + parentId + " in parent table '" + fk.getParentTable() + "' does not exist.");
+                    }
+                } catch (NumberFormatException e) {
+                    BTreeManager parentDb = getTable(fk.getParentTable());
+                    List<String> records = parentDb.scanAll();
+                    boolean found = false;
+                    for (String rec : records) {
+                        String val = extractFieldFromRecord(rec, fk.getParentField());
+                        if (parentValStr.equalsIgnoreCase(val)) {
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found) {
+                        throw new IllegalStateException("Foreign Key constraint violation: Referenced record '" + parentValStr + "' in parent table '" + fk.getParentTable() + "' field '" + fk.getParentField() + "' does not exist.");
+                    }
+                }
+            }
+        }
         
         // Write to WAL first for durability
         WriteAheadLog wal = wals.get(tableName);
@@ -193,11 +264,11 @@ public class ExecutionEngine {
             log.info("Inserted vector embedding for record id {}", id);
         }
         
-        log.info("Inserted record id {} successfully", id);
+        log.info("Inserted record id {} successfully into table '{}'", id, tableName);
         return Collections.singletonList("Inserted 1 row.");
     }
 
-    private List<String> executeUpdate(String tableName, BTreeManager db, Map<String, Object> queryNode) throws IOException {
+    private List<String> executeUpdate(String tableName, BTreeManager db, Map<String, Object> queryNode) throws Exception {
         Map<String, Object> data = (Map<String, Object>) queryNode.get("data");
         if (data == null || !data.containsKey("id")) {
             throw new IllegalArgumentException("Update data must contain an 'id'");
@@ -206,6 +277,37 @@ public class ExecutionEngine {
         int id = (Integer) data.get("id");
         String oldRecord = db.search(id);
         String value = data.toString();
+
+        // Enforce Foreign Key Constraints on child update
+        List<ForeignKeyConstraint> childFks = schemaManager.getChildConstraints(tableName);
+        for (ForeignKeyConstraint fk : childFks) {
+            Object childValObj = data.get(fk.getChildField());
+            if (childValObj != null) {
+                String parentValStr = childValObj.toString();
+                try {
+                    int parentId = Integer.parseInt(parentValStr);
+                    BTreeManager parentDb = getTable(fk.getParentTable());
+                    String parentRecord = parentDb.search(parentId);
+                    if (parentRecord == null) {
+                        throw new IllegalStateException("Foreign Key constraint violation: Referenced record id " + parentId + " in parent table '" + fk.getParentTable() + "' does not exist.");
+                    }
+                } catch (NumberFormatException e) {
+                    BTreeManager parentDb = getTable(fk.getParentTable());
+                    List<String> records = parentDb.scanAll();
+                    boolean found = false;
+                    for (String rec : records) {
+                        String val = extractFieldFromRecord(rec, fk.getParentField());
+                        if (parentValStr.equalsIgnoreCase(val)) {
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found) {
+                        throw new IllegalStateException("Foreign Key constraint violation: Referenced record '" + parentValStr + "' in parent table '" + fk.getParentTable() + "' field '" + fk.getParentField() + "' does not exist.");
+                    }
+                }
+            }
+        }
         
         WriteAheadLog wal = wals.get(tableName);
         if (wal != null) {
@@ -235,7 +337,7 @@ public class ExecutionEngine {
         }
     }
 
-    private List<String> executeDelete(String tableName, BTreeManager db, Map<String, Object> queryNode) throws IOException {
+    private List<String> executeDelete(String tableName, BTreeManager db, Map<String, Object> queryNode) throws Exception {
         int id;
         if (queryNode.containsKey("id")) {
             id = (Integer) queryNode.get("id");
@@ -246,6 +348,48 @@ public class ExecutionEngine {
         }
         
         String oldRecord = db.search(id);
+
+        // Enforce Foreign Key Constraints on Parent Deletion (RESTRICT vs CASCADE)
+        List<ForeignKeyConstraint> parentFks = schemaManager.getParentConstraints(tableName);
+        if (!parentFks.isEmpty() && oldRecord != null) {
+            int deletedParentId = id;
+            for (ForeignKeyConstraint fk : parentFks) {
+                String childTable = fk.getChildTable();
+                BTreeManager childDb = getTable(childTable);
+                List<String> childRecords = childDb.scanAll();
+                
+                List<Integer> matchingChildIds = new ArrayList<>();
+                for (String childRec : childRecords) {
+                    String val = extractFieldFromRecord(childRec, fk.getChildField());
+                    if (val != null) {
+                        try {
+                            int fkId = Integer.parseInt(val);
+                            if (fkId == deletedParentId) {
+                                int childId = extractIdFromRecord(childRec);
+                                if (childId != -1) {
+                                    matchingChildIds.add(childId);
+                                }
+                            }
+                        } catch (NumberFormatException ignored) {}
+                    }
+                }
+
+                if (!matchingChildIds.isEmpty()) {
+                    if (fk.getOnDelete() == ForeignKeyConstraint.OnDeleteAction.RESTRICT) {
+                        throw new IllegalStateException("Foreign Key constraint violation: Cannot delete record id " + deletedParentId + " from parent table '" + tableName + "' because " + matchingChildIds.size() + " referencing row(s) exist in child table '" + childTable + "'.");
+                    } else if (fk.getOnDelete() == ForeignKeyConstraint.OnDeleteAction.CASCADE) {
+                        log.info("Cascading deletion of {} referencing records in child table '{}'", matchingChildIds.size(), childTable);
+                        for (Integer childId : matchingChildIds) {
+                            Map<String, Object> deleteChildQuery = new HashMap<>();
+                            deleteChildQuery.put("action", "delete");
+                            deleteChildQuery.put("table", childTable);
+                            deleteChildQuery.put("id", childId);
+                            execute(deleteChildQuery);
+                        }
+                    }
+                }
+            }
+        }
         
         WriteAheadLog wal = wals.get(tableName);
         if (wal != null) {
@@ -391,14 +535,36 @@ public class ExecutionEngine {
 
     private String extractFieldFromRecord(String record, String fieldName) {
         if (record == null || fieldName == null) return null;
-        // Parses map toString formats such as {id=1, email=satoshi@bitcoin.org, role=admin}
-        String pattern = fieldName + "=";
-        int idx = record.indexOf(pattern);
-        if (idx == -1) {
-            pattern = "\"" + fieldName + "\":";
-            idx = record.indexOf(pattern);
-            if (idx == -1) return null;
-            int start = idx + pattern.length();
+        
+        String keyPattern = fieldName + "=";
+        int idx = -1;
+        int fromIndex = 0;
+        while ((idx = record.indexOf(keyPattern, fromIndex)) != -1) {
+            if (idx == 0) break;
+            char prev = record.charAt(idx - 1);
+            if (prev == '{' || prev == ',' || prev == ' ' || prev == '"') {
+                break;
+            }
+            fromIndex = idx + keyPattern.length();
+        }
+
+        if (idx != -1) {
+            int start = idx + keyPattern.length();
+            int end = record.length();
+            for (int i = start; i < record.length(); i++) {
+                char c = record.charAt(i);
+                if (c == ',' || c == '}') {
+                    end = i;
+                    break;
+                }
+            }
+            return record.substring(start, end).trim();
+        }
+
+        String jsonPattern = "\"" + fieldName + "\":";
+        idx = record.indexOf(jsonPattern);
+        if (idx != -1) {
+            int start = idx + jsonPattern.length();
             StringBuilder sb = new StringBuilder();
             boolean inQuotes = false;
             for (int i = start; i < record.length(); i++) {
@@ -414,15 +580,7 @@ public class ExecutionEngine {
             }
             return sb.toString().trim();
         }
-        int start = idx + pattern.length();
-        int end = record.length();
-        for (int i = start; i < record.length(); i++) {
-            char c = record.charAt(i);
-            if (c == ',' || c == '}') {
-                end = i;
-                break;
-            }
-        }
-        return record.substring(start, end).trim();
+
+        return null;
     }
 }

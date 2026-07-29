@@ -1,12 +1,12 @@
 # Roadmap & To-Do
 
-The journey for OnyxDB is just beginning. Below is our exhaustive roadmap for upcoming features, optimizations, and infrastructural overhauls. 
+Comprehensive roadmap for upcoming features, optimizations, and infrastructural overhauls in OnyxDB.
 
 ## High Priority To-Do
 - [x] **Write-Ahead Logging (WAL)**: Implement an append-only WAL to guarantee ACID durability in the event of unexpected power failures.
 - [x] **Update & Delete**: Add robust mutative and destructive B+ Tree operations with $O(\log N)$ binary search node indexing.
-- [ ] **Schema Normalization**: Implement cross-table relational links (Foreign Keys) and normal forms (1NF, 2NF, 3NF) for structured data mapping.
 - [x] **Secondary Indexes**: Extend the B+ Tree architecture to support non-primary key indexing.
+- [x] **Schema Normalization**: Implement cross-table relational links (Foreign Keys) and normal forms for structured data mapping.
 - [ ] **Transaction Isolation**: Introduce Multiversion Concurrency Control (MVCC) for Snapshot Isolation without locking reads (ACID Isolation).
 
 ## Distributed Systems
@@ -23,8 +23,3 @@ The journey for OnyxDB is just beginning. Below is our exhaustive roadmap for up
 - [x] **Role-Based Access Control (RBAC)**: Define granular permissions (`READ`, `WRITE`, `ADMIN`) at the table level.
 - [ ] **JWT Authentication**: Secure the `/api/query` endpoint utilizing stateless tokens.
 - [ ] **TLS/SSL Encryption**: Enforce secure transit for all REST payloads.
-
-## Ecosystem
-- [ ] **GraphQL Layer**: Introduce an auto-generated GraphQL schema mapping to the JSON structures within the B+ Tree.
-- [ ] **Official SDKs**: While native HTTP works perfectly, we will build official SDKs for Rust, Python, Go, and Java to provide strongly-typed ORM experiences.
-- [ ] **CLI Tool**: Develop a native terminal binary (written in Rust or Go) to interact with OnyxDB without needing a browser.

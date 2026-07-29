@@ -40,4 +40,13 @@ This document tracks the complete chronological version history of **OnyxDB** fr
 - Dynamic `create_index` REST & Core action.
 - Automated secondary index maintenance during `insert`, `update`, and `delete`.
 - Index Scan query routing in $O(\log N)$ time.
-- Enterprise-grade codebase refactoring, version archiving (`versions/v1_prototype/`), clean modular architecture, and documentation suite (`PROJECT_STRUCTURE.md`, `FILE_INDEX.md`, `STATUS.md`, `REFACTOR_LOG.md`, `VERSION_HISTORY.md`, `PATHS.md`).
+- Enterprise-grade codebase refactoring, single lowercase [`docs/`](./) directory structure, version archiving ([`docs/versions/v1_prototype/`](./versions/v1_prototype/)), clean modular architecture, and documentation suite ([`structure.md`](./structure.md), [`file_index.md`](./file_index.md), [`status.md`](./status.md), [`refactor_log.md`](./refactor_log.md), [`version_history.md`](./version_history.md), [`paths.md`](./paths.md)).
+
+### **v2.5.0 — Schema Normalization & Foreign Key Constraints (Day 9)**
+- Cross-table relational links and Foreign Key constraint engine ([`ForeignKeyConstraint.java`](file:///d:/db/onyxdb-core/src/main/java/com/onyxdb/core/schema/ForeignKeyConstraint.java)).
+- Persistence manager ([`SchemaManager.java`](file:///d:/db/onyxdb-core/src/main/java/com/onyxdb/core/schema/SchemaManager.java)) for storing `.schema` files to disk across database restarts.
+- Dynamic query action `create_foreign_key` / `add_foreign_key`.
+- `RESTRICT` policy enforcement: blocks parent deletion/updates when active child table references exist.
+- `CASCADE` policy enforcement: automatically deletes child table records when parent record is deleted.
+- Full unit test coverage ([`ForeignKeyTest.java`](file:///d:/db/onyxdb-core/src/test/java/com/onyxdb/core/schema/ForeignKeyTest.java)).
+

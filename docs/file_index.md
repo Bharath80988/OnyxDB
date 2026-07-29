@@ -57,6 +57,15 @@ This document catalogs all major source files across the **OnyxDB** codebase, ou
 * **Dependencies:** Java NIO file streams.
 * **Used By:** `ExecutionEngine.java`.
 
+### 7. `SchemaManager.java` & `ForeignKeyConstraint.java`
+* **Path:** [`onyxdb-core/src/main/java/com/onyxdb/core/schema/SchemaManager.java`](file:///d:/db/onyxdb-core/src/main/java/com/onyxdb/core/schema/SchemaManager.java)
+* **Purpose:** Relational foreign key constraint engine and `.schema` persistence manager.
+* **Responsibilities:**
+  - Enforces `RESTRICT` and `CASCADE` relational constraints during record mutations.
+  - Persists table schema files across database restarts.
+* **Dependencies:** `ForeignKeyConstraint.java`, Java Object Streams.
+* **Used By:** `ExecutionEngine.java`, `ForeignKeyTest.java`.
+
 ---
 
 ## 🌐 `onyxdb-api` REST Layer Files

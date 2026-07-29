@@ -170,6 +170,18 @@ OnyxDB operates across three isolated modules:
 - `onyxdb-api`: Spring Boot REST API layer handling query dispatching, RBAC authentication, and caching.
 - `onyxdb-dashboard`: React + Vite UI featuring Visual Query Builder, real-time telemetry metrics, and 10 dynamic themes.
 
-## Status & Roadmap
+## Status & Documentation
 
-To view our comprehensive implemented features list and upcoming roadmap items, navigate to the `/status` page in the OnyxDB Dashboard or view `status/functionalities/roadmap.md`.
+All technical documentation, architecture guides, release logs, and roadmap items are consolidated inside the [`docs/`](./docs) folder:
+- [Project Folder Structure](docs/structure.md)
+- [File Index & Component Catalog](docs/file_index.md)
+- [System Status & Roadmap](docs/status.md)
+- [Architecture Overview](docs/architecture.md)
+- [Implemented Features List](docs/implemented.md)
+- [Upcoming Roadmap](docs/roadmap.md)
+- [Refactor Audit Log](docs/refactor_log.md)
+- [Version History Timeline](docs/version_history.md)
+- [Developer Path Guide](docs/paths.md)
+- [Release Logs](docs/logs)
+- [Archived Prototypes](docs/versions/v1_prototype)
+
