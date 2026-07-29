@@ -1,4 +1,4 @@
-# OnyxDB (v2.4.0)
+# OnyxDB (v2.5.0)
 
 > **The Multi-Table Omni-Channel Database built on B+ Trees.**
 
@@ -13,15 +13,21 @@ Unlike traditional RDBMS systems that require heavy installations, background se
 - **Zero Configuration:** Click, start, and query. No `pg_hba.conf`, no user creation scripts, no socket configuration.
 - **Multi-Table Dynamic Routing:** Automatically routes JSON payloads to independent B+ Trees on the fly.
 - **Secondary B+ Tree Indexing:** Non-primary key queries execute in $O(\log N)$ time with automatic index synchronization.
+- **Schema Normalization & Foreign Keys:** Relational integrity enforcement (`RESTRICT` / `CASCADE`) with persistent disk schemas.
 
 ## Release Highlights
+
+### v2.5.0: Schema Normalization & Foreign Key Constraints
+- **Foreign Key Engine (`ForeignKeyConstraint.java`)**: Cross-table relational enforcement supporting `RESTRICT` and `CASCADE` policies.
+- **Schema Persistence (`SchemaManager.java`)**: Automatic `.schema` serialization to preserve constraints across engine restarts.
+- **Dynamic Query Action (`create_foreign_key`)**: Register foreign keys dynamically via REST payload.
+- **Full Master Query Guide ([`docs/query_guide.md`](./docs/query_guide.md))**: Complete developer guide for complex query patterns.
 
 ### v2.4.0: Secondary B+ Tree Indexing & Query Acceleration
 - **Secondary Index Engine (`SecondaryBTreeIndex.java`)**: Maps secondary string attribute values (e.g. `email`, `role`, `status`) to primary key integer record IDs (`id`).
 - **Dynamic Index Creation (`create_index`)**: Easily create indexes over existing B+ Tree record pages on demand.
 - **Automated Index Maintenance**: `insert`, `update`, and `delete` operations automatically synchronize registered secondary indexes.
 - **Index Scan Query Routing**: `select` queries with `"where"` filters transparently execute Secondary Index Scans in $O(\log N)$ time, avoiding full table scans.
-- **RBAC Protection**: Administrative `create_index` actions are protected with `ADMIN` Bearer tokens.
 
 ### v2.3.0: B+ Tree Update/Delete & Binary Search Acceleration
 - **Update & Delete Operations**: In-place modifications and slot-shifting deletions.
@@ -126,6 +132,21 @@ Insert vector arrays in your payload and query top `k` mathematically similar it
   "k": 5
 }
 ```
+
+#### **H. Create Foreign Key Constraint (`RESTRICT` / `CASCADE`)**
+Enforces cross-table relational links between child and parent tables:
+```json
+{
+  "action": "create_foreign_key",
+  "table": "orders",
+  "field": "user_id",
+  "parent_table": "users",
+  "parent_field": "id",
+  "on_delete": "CASCADE"
+}
+```
+
+> 📖 **For complete query examples, complex filters, and full payload documentation, see the [Master Query Guide (`docs/query_guide.md`)](./docs/query_guide.md).**
 
 ---
 

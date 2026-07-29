@@ -100,3 +100,12 @@ This document catalogs all major source files across the **OnyxDB** codebase, ou
 * **Path:** `onyxdb-dashboard/src/VisualQueryBuilder.tsx`
 * **Purpose:** Drag-and-drop React Flow visual pipeline builder for query construction.
 * **Responsibilities:** Converts visual node graphs into structured OnyxDB JSON queries.
+
+---
+
+## 📖 Documentation Suite
+
+### 11. `query_guide.md`
+* **Path:** [`docs/query_guide.md`](file:///d:/db/docs/query_guide.md)
+* **Purpose:** Authoritative developer reference manual for all simple and complex query patterns.
+* **Responsibilities:** Documents authentication, JSON payload formats, relational foreign key constraints (`RESTRICT` / `CASCADE`), vector search, and complex index scans.
