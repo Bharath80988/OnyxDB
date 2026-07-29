@@ -1,59 +1,60 @@
-# OnyxDB (v2.5.0)
+# OnyxDB (v3.0.0)
 
 > **The Multi-Table Omni-Channel Database built on B+ Trees.**
 
-OnyxDB is a lightning-fast, local-first database built from the ground up for the modern developer experience. Fully offline capable, natively concurrent, and hyper-visual by design.
+OnyxDB is a fast, local-first database built for a clean developer experience. It is fully offline capable, natively concurrent, and visual by design.
 
-Unlike traditional RDBMS systems that require heavy installations, background services, and complex configurations, OnyxDB runs entirely as an embedded JAR or standalone server. It speaks pure JSON over HTTP natively, allowing seamless integration with any modern backend framework.
+Unlike traditional relational database systems that require heavy setup, background services, and complex configuration files, OnyxDB runs entirely as an embedded Java library or a standalone server. It uses standard JSON payloads over HTTP and TCP socket connections, enabling straightforward integration with any modern application backend.
 
 ## Why OnyxDB?
 
-- **Embeddability & Offline-First:** Runs inside your Java process or locally without spinning up Docker containers or managing background services. Perfect for local dev environments.
-- **Visual Transparency:** The out-of-the-box Dashboard visually shows you exactly what the B+ Tree, Buffer Pool, and Write-Ahead Log are doing in real-time.
-- **Zero Configuration:** Click, start, and query. No `pg_hba.conf`, no user creation scripts, no socket configuration.
-- **Multi-Table Dynamic Routing:** Automatically routes JSON payloads to independent B+ Trees on the fly.
-- **Secondary B+ Tree Indexing:** Non-primary key queries execute in $O(\log N)$ time with automatic index synchronization.
-- **Schema Normalization & Foreign Keys:** Relational integrity enforcement (`RESTRICT` / `CASCADE`) with persistent disk schemas.
-
-## Release Highlights
-
-### v2.5.0: Schema Normalization & Foreign Key Constraints
-- **Foreign Key Engine (`ForeignKeyConstraint.java`)**: Cross-table relational enforcement supporting `RESTRICT` and `CASCADE` policies.
-- **Schema Persistence (`SchemaManager.java`)**: Automatic `.schema` serialization to preserve constraints across engine restarts.
-- **Dynamic Query Action (`create_foreign_key`)**: Register foreign keys dynamically via REST payload.
-- **Full Master Query Guide ([`docs/query_guide.md`](./docs/query_guide.md))**: Complete developer guide for complex query patterns.
-
-### v2.4.0: Secondary B+ Tree Indexing & Query Acceleration
-- **Secondary Index Engine (`SecondaryBTreeIndex.java`)**: Maps secondary string attribute values (e.g. `email`, `role`, `status`) to primary key integer record IDs (`id`).
-- **Dynamic Index Creation (`create_index`)**: Easily create indexes over existing B+ Tree record pages on demand.
-- **Automated Index Maintenance**: `insert`, `update`, and `delete` operations automatically synchronize registered secondary indexes.
-- **Index Scan Query Routing**: `select` queries with `"where"` filters transparently execute Secondary Index Scans in $O(\log N)$ time, avoiding full table scans.
-
-### v2.3.0: B+ Tree Update/Delete & Binary Search Acceleration
-- **Update & Delete Operations**: In-place modifications and slot-shifting deletions.
-- **Binary Search Acceleration**: Leaf page searches utilize $O(\log N)$ binary search indexing over 256-byte page slots.
-- **WAL Durability**: Append-only durability logging for crash recovery.
-- **RBAC Security Guard**: Restricts mutative and administrative operations to `ADMIN` Bearer tokens.
+- **Embeddability and Offline Operation:** Runs directly inside your Java application or locally on your system without requiring Docker containers or background daemon processes.
+- **Visual Observability:** Includes a real-time dashboard that displays B+ Tree states, buffer pool cache metrics, and Write-Ahead Log events.
+- **Zero Configuration:** Ready to run immediately without custom network socket rules, system user creation, or configuration files.
+- **Multi-Table Dynamic Routing:** Automatically creates and routes query payloads to independent storage files (`<table_name>.db`).
+- **Secondary Indexing:** Non-primary key queries execute in logarithmic time ($O(\log N)$) with automatic secondary index synchronization.
+- **Schema Normalization & Foreign Keys:** Enforces cross-table relational integrity (`RESTRICT` and `CASCADE` policies) with persistent disk schemas.
+- **OS Zero-Copy Memory Mapping (`mmap`)**: Maps storage files directly into Operating System Virtual Memory for direct off-heap page access without heap memory copies.
+- **Round-Robin Multi-Reactor Event Loops**: Distributes client socket connections across CPU worker threads using Round-Robin scheduling for high multi-core throughput.
 
 ---
 
-## ⚡ What OnyxDB Can Do & How To Use It
+## Release Highlights
 
-OnyxDB processes queries over standard HTTP `POST` requests to `http://localhost:8080/api/query`.
+### v3.0.0: OS Memory Mapping, Round-Robin Worker Pool & Native TCP Server
+- **OS Memory Mapping (`MmapStorageManager.java`)**: Maps database files directly into OS Virtual Memory using `MappedByteBuffer`, eliminating heap copying and user-kernel context switching overhead.
+- **Round-Robin Multi-Reactor Worker Pool (`RoundRobinWorkerGroup.java`)**: Distributes TCP socket connections across worker event loops using Round-Robin load balancing.
+- **Non-Blocking TCP Socket Server (`OnyxNativeSocketServer.java`)**: High-performance socket server running on port `8081` bypassing HTTP servlet overhead for low latency queries.
+- **Technical Product Architecture Pitch ([`docs/onyxdb_architecture_pitch.md`](./docs/onyxdb_architecture_pitch.md))**: Complete architectural comparison against MySQL, PostgreSQL, and MongoDB.
+
+### v2.5.0: Schema Normalization & Foreign Key Constraints
+- **Foreign Key Engine (`ForeignKeyConstraint.java`)**: Relational integrity enforcement supporting `RESTRICT` and `CASCADE` deletion policies.
+- **Schema Persistence (`SchemaManager.java`)**: Automatic `.schema` disk file serialization preserving schema rules across system restarts.
+- **Master Query Guide ([`docs/query_guide.md`](./docs/query_guide.md))**: Complete developer reference manual for query syntax and usage.
+
+### v2.4.0: Secondary B+ Tree Indexing & Query Acceleration
+- **Secondary Index Engine (`SecondaryBTreeIndex.java`)**: Maps non-primary key values (`email`, `status`, `role`) to primary record IDs.
+- **Automated Index Maintenance**: Automatically synchronizes secondary indexes during `insert`, `update`, and `delete` operations.
+
+---
+
+## Usage & Query Actions
+
+OnyxDB accepts query payloads via standard HTTP `POST` requests to `http://localhost:8080/api/query` or non-blocking TCP socket connections on port `8081`.
 
 ### 1. Authentication (RBAC)
-Include the appropriate `Authorization` header with your requests:
-- **Admin Role** (Full access: Insert, Update, Delete, Select, Create Index):
+Include the appropriate `Authorization` header with requests:
+- **Admin Role** (Full access: Insert, Update, Delete, Select, Create Index, Create Foreign Key):
   `Authorization: Bearer admin-secret-key`
-- **Read-Only Role** (Selects only, rejects mutations):
+- **Read-Only Role** (Selects and vector searches only):
   `Authorization: Bearer readonly-secret-key`
 
 ---
 
-### 2. Supported Query Actions
+### 2. Query Actions
 
-#### **A. Insert / Upsert Record**
-Inserts a record into the target table (dynamically creating `<table_name>.db` if it doesn't exist).
+#### A. Insert Record
+Inserts a record payload into the specified table.
 ```json
 {
   "action": "insert",
@@ -67,8 +68,8 @@ Inserts a record into the target table (dynamically creating `<table_name>.db` i
 }
 ```
 
-#### **B. Update Record**
-Modifies an existing record in place inside the B+ Tree page.
+#### B. Update Record
+Modifies an existing record in place within the B+ Tree page.
 ```json
 {
   "action": "update",
@@ -82,8 +83,8 @@ Modifies an existing record in place inside the B+ Tree page.
 }
 ```
 
-#### **C. Delete Record**
-Removes a record from B+ Tree leaf pages and shifts slot memory.
+#### C. Delete Record
+Removes a record from B+ Tree leaf pages and shifts memory slots.
 ```json
 {
   "action": "delete",
@@ -92,8 +93,8 @@ Removes a record from B+ Tree leaf pages and shifts slot memory.
 }
 ```
 
-#### **D. Point Select by Primary Key ($O(\log N)$)**
-Fast binary search lookup by primary key `id`.
+#### D. Point Select by Primary Key
+Performs a fast binary search lookup by primary key (`id`).
 ```json
 {
   "action": "select",
@@ -102,8 +103,8 @@ Fast binary search lookup by primary key `id`.
 }
 ```
 
-#### **E. Create Secondary Index ($O(\log N)$ Lookups on Non-Primary Keys)**
-Builds a secondary index on a specific field (e.g. `email`).
+#### E. Create Secondary Index
+Builds a secondary B+ Tree index on a specific attribute field (`email`).
 ```json
 {
   "action": "create_index",
@@ -112,8 +113,8 @@ Builds a secondary index on a specific field (e.g. `email`).
 }
 ```
 
-#### **F. Select by Secondary Index ($O(\log N)$ Index Scan)**
-Retrieves records matching secondary attribute values via Secondary Index Scan without scanning the entire table.
+#### F. Select by Secondary Index
+Retrieves matching records using a secondary index scan without scanning the entire table.
 ```json
 {
   "action": "select",
@@ -122,8 +123,8 @@ Retrieves records matching secondary attribute values via Secondary Index Scan w
 }
 ```
 
-#### **G. Vector Search (AI KNN Cosine Similarity)**
-Insert vector arrays in your payload and query top `k` mathematically similar items:
+#### G. Vector Search (AI KNN Cosine Similarity)
+Queries the top `k` nearest vector embeddings using Cosine Similarity:
 ```json
 {
   "action": "vector_search",
@@ -133,7 +134,7 @@ Insert vector arrays in your payload and query top `k` mathematically similar it
 }
 ```
 
-#### **H. Create Foreign Key Constraint (`RESTRICT` / `CASCADE`)**
+#### H. Create Foreign Key Constraint
 Enforces cross-table relational links between child and parent tables:
 ```json
 {
@@ -146,7 +147,7 @@ Enforces cross-table relational links between child and parent tables:
 }
 ```
 
-> 📖 **For complete query examples, complex filters, and full payload documentation, see the [Master Query Guide (`docs/query_guide.md`)](./docs/query_guide.md).**
+For complete query documentation, complex filters, and advanced usage patterns, see the [Master Query Guide (`docs/query_guide.md`)](./docs/query_guide.md).
 
 ---
 
@@ -177,32 +178,27 @@ Add JitPack dependency to `pom.xml`:
 ```bash
 git clone https://github.com/Bharath80988/OnyxDB.git
 cd OnyxDB
-.\maven-bin\apache-maven-3.9.6\bin\mvn.cmd clean package -DskipTests
+mvn clean package -DskipTests
 java -jar onyxdb-api/target/onyxdb-api-0.1.3.jar
 ```
-*Note: OnyxDB statically bundles the React dashboard directly inside the Java `.jar` file!*
 
 ---
 
-## Architecture
+## Architecture Overview
 
-OnyxDB operates across three isolated modules:
-- `onyxdb-core`: Java 21 storage engine with Page Manager, B+ Tree primary & secondary indexes, Vector HNSW search, and WAL crash recovery.
-- `onyxdb-api`: Spring Boot REST API layer handling query dispatching, RBAC authentication, and caching.
-- `onyxdb-dashboard`: React + Vite UI featuring Visual Query Builder, real-time telemetry metrics, and 10 dynamic themes.
+OnyxDB is structured into three main modules:
+- `onyxdb-core`: Java storage engine managing zero-copy memory mapping (`mmap`), B+ Tree indexing, vector HNSW search, foreign keys, and WAL durability.
+- `onyxdb-api`: Service layer providing HTTP REST endpoints, non-blocking TCP socket multiplexing (`OnyxNativeSocketServer`), and RBAC authentication.
+- `onyxdb-dashboard`: React web dashboard providing dynamic node-based query building and system metrics.
 
-## Status & Documentation
+---
 
-All technical documentation, architecture guides, release logs, and roadmap items are consolidated inside the [`docs/`](./docs) folder:
+## Documentation
+
+All documentation and technical guides are located in the [`docs/`](./docs) directory:
 - [Project Folder Structure](docs/structure.md)
-- [File Index & Component Catalog](docs/file_index.md)
-- [System Status & Roadmap](docs/status.md)
+- [File Index and Component Catalog](docs/file_index.md)
+- [System Status and Roadmap](docs/status.md)
 - [Architecture Overview](docs/architecture.md)
-- [Implemented Features List](docs/implemented.md)
-- [Upcoming Roadmap](docs/roadmap.md)
-- [Refactor Audit Log](docs/refactor_log.md)
-- [Version History Timeline](docs/version_history.md)
-- [Developer Path Guide](docs/paths.md)
-- [Release Logs](docs/logs)
-- [Archived Prototypes](docs/versions/v1_prototype)
-
+- [Master Query Guide](docs/query_guide.md)
+- [Product Architecture Pitch and Comparison](docs/onyxdb_architecture_pitch.md)

@@ -1,20 +1,20 @@
-# OnyxDB - File Index & Component Catalog
+# OnyxDB - File Index and Component Catalog
 
 This document catalogs all major source files across the **OnyxDB** codebase, outlining their core purpose, dependencies, usage, and system relationships.
 
 ---
 
-## 📦 `onyxdb-core` Engine Files
+## `onyxdb-core` Engine Files
 
 ### 1. `ExecutionEngine.java`
 * **Path:** [`onyxdb-core/src/main/java/com/onyxdb/core/execution/ExecutionEngine.java`](file:///d:/db/onyxdb-core/src/main/java/com/onyxdb/core/execution/ExecutionEngine.java)
 * **Purpose:** Central execution orchestrator and query command router.
 * **Responsibilities:**
-  - Parses incoming JSON queries (`insert`, `update`, `delete`, `select`, `create_index`, `vector_search`).
-  - Manages per-table B+ Trees, WAL files, HNSW vector indexes, and secondary indexes.
+  - Parses incoming JSON queries (`insert`, `update`, `delete`, `select`, `create_index`, `create_foreign_key`, `vector_search`).
+  - Manages per-table B+ Trees, WAL files, HNSW vector indexes, secondary indexes, and foreign keys.
   - Replays WAL logs during automated crash recovery.
-* **Dependencies:** `BTreeManager`, `SecondaryBTreeIndex`, `WriteAheadLog`, `HnswIndex`, `StorageManager`, `BufferPool`.
-* **Used By:** `QueryService.java`.
+* **Dependencies:** `BTreeManager`, `SecondaryBTreeIndex`, `WriteAheadLog`, `HnswIndex`, `StorageManager`, `SchemaManager`.
+* **Used By:** `QueryService.java`, `OnyxNativeSocketServer.java`.
 
 ### 2. `BTreeManager.java`
 * **Path:** [`onyxdb-core/src/main/java/com/onyxdb/core/index/BTreeManager.java`](file:///d:/db/onyxdb-core/src/main/java/com/onyxdb/core/index/BTreeManager.java)
@@ -28,16 +28,16 @@ This document catalogs all major source files across the **OnyxDB** codebase, ou
 * **Path:** [`onyxdb-core/src/main/java/com/onyxdb/core/index/SecondaryBTreeIndex.java`](file:///d:/db/onyxdb-core/src/main/java/com/onyxdb/core/index/SecondaryBTreeIndex.java)
 * **Purpose:** Secondary attribute indexing engine.
 * **Responsibilities:**
-  - Maps non-primary key string values (e.g., `email`, `role`) to primary record IDs (`id`).
-  - Supports insert, remove, update, and fast $O(\log N)$ search operations.
+  - Maps non-primary key values (e.g. `email`, `role`) to primary record IDs (`id`).
+  - Supports insert, remove, update, and logarithmic ($O(\log N)$) search operations.
 * **Dependencies:** Standard Java concurrent collections (`ConcurrentHashMap`, `ConcurrentSkipListSet`).
 * **Used By:** `ExecutionEngine.java`, `SecondaryIndexTest.java`.
 
 ### 4. `StorageManager.java`
 * **Path:** [`onyxdb-core/src/main/java/com/onyxdb/core/storage/StorageManager.java`](file:///d:/db/onyxdb-core/src/main/java/com/onyxdb/core/storage/StorageManager.java)
-* **Purpose:** Low-level unbuffered RandomAccess file I/O layer.
+* **Purpose:** File I/O layer using off-heap direct memory buffers.
 * **Responsibilities:**
-  - Reads and writes raw 8KB blocks to `.db` physical disk files using Java NIO.
+  - Reads and writes 8KB page blocks to `.db` disk files using Java NIO and direct memory.
 * **Dependencies:** `java.nio.channels.FileChannel`, `Page`.
 * **Used By:** `BufferPool.java`.
 
@@ -45,7 +45,7 @@ This document catalogs all major source files across the **OnyxDB** codebase, ou
 * **Path:** [`onyxdb-core/src/main/java/com/onyxdb/core/storage/BufferPool.java`](file:///d:/db/onyxdb-core/src/main/java/com/onyxdb/core/storage/BufferPool.java)
 * **Purpose:** In-memory LRU cache manager for disk pages.
 * **Responsibilities:**
-  - Evicts least-recently-used pages to prevent RAM exhaustion on large datasets.
+  - Evicts least-recently-used pages to prevent memory exhaustion on large datasets.
 * **Dependencies:** `StorageManager`, `Page`.
 * **Used By:** `BTreeManager.java`, `ExecutionEngine.java`.
 
@@ -75,18 +75,18 @@ This document catalogs all major source files across the **OnyxDB** codebase, ou
 
 ---
 
-## 🌐 `onyxdb-api` Network Layer Files
+## `onyxdb-api` Network Layer Files
 
 ### 9. `OnyxNativeSocketServer.java` & `RoundRobinWorkerGroup.java`
 * **Path:** [`onyxdb-api/src/main/java/com/onyxdb/api/network/OnyxNativeSocketServer.java`](file:///d:/db/onyxdb-api/src/main/java/com/onyxdb/api/network/OnyxNativeSocketServer.java)
-* **Purpose:** High-performance non-blocking NIO TCP socket server on port `8081` with Round-Robin worker thread load balancing.
-* **Responsibilities:** Bypasses HTTP REST servlet overhead for microsecond query latencies across CPU worker event loops.
+* **Purpose:** Non-blocking TCP socket server on port `8081` with Round-Robin worker load balancing.
+* **Responsibilities:** Bypasses HTTP REST servlet overhead for low latency queries across CPU worker event loops.
 * **Dependencies:** `ServerSocketChannel`, `Selector`, `ExecutionEngine`.
 * **Used By:** `OnyxDbConfig.java`, `NativeSocketServerTest.java`.
 
 ---
 
-## 🎨 `onyxdb-dashboard` UI Files
+## `onyxdb-dashboard` UI Files
 
 ### 10. `App.tsx`
 * **Path:** `onyxdb-dashboard/src/App.tsx`
@@ -94,12 +94,12 @@ This document catalogs all major source files across the **OnyxDB** codebase, ou
 
 ---
 
-## 📖 Documentation Suite
+## Documentation Suite
 
 ### 11. `query_guide.md`
 * **Path:** [`docs/query_guide.md`](file:///d:/db/docs/query_guide.md)
-* **Purpose:** Authoritative developer reference manual for all simple and complex query patterns.
+* **Purpose:** Developer reference manual for simple and complex query patterns.
 
 ### 12. `onyxdb_architecture_pitch.md`
 * **Path:** [`docs/onyxdb_architecture_pitch.md`](file:///d:/db/docs/onyxdb_architecture_pitch.md)
-* **Purpose:** Technical competitive breakdown and pitch matrix vs MySQL, PostgreSQL, and MongoDB.
+* **Purpose:** Technical comparison and feature breakdown vs MySQL, PostgreSQL, and MongoDB.

@@ -1,69 +1,69 @@
-# 🚀 OnyxDB — Product Architecture & Competitive Advantage Pitch
+# OnyxDB — Product Architecture and Technical Feature Comparison
 
-This document provides a comprehensive technical comparison and feature matrix explaining how **OnyxDB** compares against traditional databases (MySQL, PostgreSQL, MongoDB), highlighting its OS-level, network-level, and algorithmic innovations.
+This document provides a clear technical comparison explaining how **OnyxDB** compares against traditional database systems (MySQL, PostgreSQL, and MongoDB). It highlights key operating system, networking, and algorithmic design choices.
 
 ---
 
-## 📊 1. OnyxDB vs. Legacy Databases (MySQL, PostgreSQL, MongoDB)
+## 1. OnyxDB vs. Traditional Databases (MySQL, PostgreSQL, MongoDB)
 
-| Feature / Domain | 🐬 MySQL (InnoDB) | 🐘 PostgreSQL | 🍃 MongoDB | 💎 **OnyxDB (v3.0.0)** |
+| Feature / System Domain | MySQL (InnoDB) | PostgreSQL | MongoDB | **OnyxDB (v3.0.0)** |
 | :--- | :--- | :--- | :--- | :--- |
-| **Architecture** | Client-Server RDBMS | Heavy Process RDBMS | Document Store Engine | **Multi-Table Hybrid B+ Tree + Vector Engine** |
-| **Deployment Model** | External Daemon / Service | Heavy System Daemon | Multi-Process Daemon | **Embedded Uber-JAR / Standalone / Zero-Config** |
-| **Query Format** | SQL String | SQL String | MQL / JSON | **Pure Native JSON over HTTP & Non-Blocking TCP** |
-| **Native AI Vectors** | ❌ Requires Third-Party Plugins | ❌ Requires `pgvector` extension | ❌ Requires Atlas Vector Search | **✅ Native HNSW KNN Vector Search Built-In** |
-| **Secondary Indexing** | B+ Tree | B-Tree / BRIN / GIST | B-Tree | **✅ $O(\log N)$ Secondary B+ Trees with Auto-Sync** |
-| **Relational Integrity** | InnoDB Foreign Keys | Foreign Key Constraints | ❌ None (Manual Lookup) | **✅ Foreign Keys (`RESTRICT` & `CASCADE`)** |
-| **OS Memory Model** | Buffer Pool System Calls | Shared Buffers / OS Cache | WiredTiger Cache | **✅ Zero-Copy `mmap` Kernel Virtual Memory Page Cache** |
-| **Network Protocol** | Custom Binary Protocol | Custom Wire Protocol | Wire Protocol | **✅ Round-Robin Multi-Reactor NIO Socket Server** |
-| **Visual Observability** | Third-Party (Workbench) | Third-Party (pgAdmin) | MongoDB Compass | **✅ Embedded Real-Time React Flow Dashboard** |
+| **Database Type** | Relational Database | Relational Database | Document Store | **Hybrid B+ Tree and AI Vector Engine** |
+| **Deployment Model** | External Server | System Service | External Daemon Process | **Embedded Library or Standalone JAR** |
+| **Query Protocol** | SQL String Commands | SQL String Commands | MQL JSON Queries | **Structured JSON over HTTP and TCP** |
+| **Native AI Vector Search** | Requires external plugins | Requires pgvector extension | Requires Atlas Search | **Native HNSW Vector Search Built-In** |
+| **Secondary Indexes** | B+ Tree | B-Tree / BRIN / GIST | B-Tree | **Secondary B+ Trees with Auto-Sync** |
+| **Relational Integrity** | Foreign Key Constraints | Foreign Key Constraints | Manual Application Logic | **Foreign Keys (RESTRICT and CASCADE)** |
+| **OS Memory Model** | Buffer Pool System Calls | Shared Buffers / OS Cache | WiredTiger Engine Cache | **Zero-Copy Operating System Memory Mapping (`mmap`)** |
+| **Network Architecture** | Custom Binary Protocol | Wire Protocol | Wire Protocol | **Round-Robin Multi-Reactor TCP Server** |
+| **Visual Dashboard** | Third-Party Workbench | Third-Party pgAdmin | MongoDB Compass | **Built-In Real-Time Dashboard** |
 
 ---
 
-## 🛠️ 2. What OnyxDB Does Differently
+## 2. Core Differences in OnyxDB
 
-### A. Hybrid Engine (Relational B+ Tree + Native AI Vector Search)
-Traditional databases force developers to run separate relational databases (PostgreSQL/MySQL) alongside specialized vector databases (Pinecone/Milvus) for AI LLM/RAG applications. 
-- **OnyxDB combines both into a single engine**: Every leaf node in OnyxDB's B+ Tree can hold high-dimensional floating-point vectors alongside standard structured JSON fields, allowing exact **KNN Cosine Similarity vector searches** and relational foreign key queries inside the same database engine!
+### A. Combined Relational and AI Vector Engine
+Traditional setups require running separate relational databases for structured data and specialized vector databases for AI embeddings. 
+- **OnyxDB combines both into a single engine**: Leaf nodes in OnyxDB can store both structured JSON data and high-dimensional floating-point vectors. This enables developers to run exact vector similarity searches and relational foreign key queries in the same database.
 
-### B. Embedded Zero-Configuration Protocol
-- No `pg_hba.conf`, no user creation scripts, no Docker dependencies, no port binding conflicts.
-- Runs as an embedded Java process or standalone Uber-JAR (`npx onyxdb` / `pip install onyxdb`), automatically initializing dynamic table storage files (`<table_name>.db`) on the fly.
-
----
-
-## 💻 3. OS-Level Optimizations
-
-### A. Zero-Copy Kernel Memory Mapping (`MmapStorageManager`)
-- Traditional databases issue frequent `read()` and `write()` kernel system calls, requiring expensive context switches between **User Space** and **Kernel Space** and copying bytes into heap memory.
-- **OnyxDB uses `FileChannel.map()` (`MappedByteBuffer`)**: Disk page files (`.db`) are mapped directly into the Operating System Virtual Memory Page Cache.
-- **Result**: Page lookups become direct off-heap memory pointer dereferences. The OS kernel's Virtual Memory Manager (VMM) handles dirty page writes asynchronously to NVMe/SSD storage without blocking worker threads.
-
-### B. Off-Heap Direct Memory Allocation
-- Uses `ByteBuffer.allocateDirect()` for zero-copy I/O buffers, bypassing the Java Virtual Machine (JVM) Heap Garbage Collector (GC). This eliminates GC pauses during high-concurrency workloads.
+### B. Embedded Operation Without Setup
+- OnyxDB requires no user setup scripts, configuration files, or Docker setups.
+- It runs inside your Java application or as a standalone process (`npx onyxdb` or `pip install onyxdb`), automatically creating database files (`<table_name>.db`) on demand.
 
 ---
 
-## 🌐 4. Network-Level Optimizations
+## 3. Operating System Level Optimizations
+
+### A. Zero-Copy Memory Mapping (`MmapStorageManager`)
+- Standard database systems execute frequent file read and write system calls, causing context switches between user space and kernel space.
+- **OnyxDB uses memory-mapped files (`FileChannel.map`)**: Database files (`.db`) are mapped directly into the Operating System Virtual Memory Page Cache.
+- **Benefit**: Page lookups happen directly through off-heap memory pointers. The operating system kernel manages background page writes to storage asynchronously without blocking application threads.
+
+### B. Off-Heap Direct Memory Buffers
+- OnyxDB uses off-heap direct memory buffers (`ByteBuffer.allocateDirect`) to bypass the Java Garbage Collector, eliminating garbage collection pauses during heavy database traffic.
+
+---
+
+## 4. Networking Optimizations
 
 ### A. Round-Robin Multi-Reactor Event Loop Architecture
-- Implements a high-throughput, non-blocking Multi-Reactor pattern (similar to Nginx / Netty):
-  - **Acceptor Loop**: A main `Selector` thread accepts incoming client TCP socket connections on port `8081`.
-  - **Round-Robin Worker Selector Pool**: Distributes newly accepted client channels across a pool of $N$ worker thread event-loops using a **Round-Robin scheduling algorithm** (`AtomicIntegerIndex % numWorkers`).
-- **Result**: Zero thread lock contention, maximum multi-core CPU utilization, and microsecond-level query latencies.
+- OnyxDB uses a multi-reactor event loop pattern:
+  - **Acceptor Thread**: A central acceptor thread listens for incoming client TCP socket connections on port `8081`.
+  - **Round-Robin Worker Pool**: Incoming socket connections are assigned across CPU worker threads using a Round-Robin algorithm.
+- **Benefit**: Avoids thread lock contention and ensures efficient multi-core CPU usage for low latency queries.
 
 ### B. Dual-Channel Protocol Support
-- Supports both standard **HTTP REST** (`/api/query` on port `8080`) for web dashboards/browser applications and **Native TCP Socket Multiplexing** (port `8081`) for ultra-low latency backend microservices.
+- Provides standard **HTTP REST** (`/api/query` on port `8080`) for web clients and **Native TCP Sockets** (port `8081`) for backend services.
 
 ---
 
-## 🧮 5. Algorithmic Optimizations
+## 5. Algorithmic Optimizations
 
-1. **Leaf Slot Binary Search Acceleration ($O(\log N)$)**:
-   - Records within 8KB slotted B+ Tree leaf pages are indexed using binary search over 256-byte slots, reducing intra-page record lookup complexity from $O(N)$ linear scans to $O(\log N)$.
-2. **HNSW KNN Cosine Similarity Search**:
-   - Computes mathematical vector distance metrics in native Java to return Top-K nearest neighbor embeddings instantly.
-3. **Automated Secondary Index Synchronization**:
-   - Secondary B+ Trees (`SecondaryBTreeIndex.java`) automatically reflect `INSERT`, `UPDATE`, and `DELETE` mutations with $O(\log N)$ secondary index scans.
-4. **Foreign Key Integrity Rules**:
-   - Enforces `RESTRICT` and `CASCADE` constraint checks during mutations, maintaining cross-table relational integrity.
+1. **Leaf Slot Binary Search ($O(\log N)$)**:
+   - Records in 8KB slotted B+ Tree pages are searched using binary search over 256-byte slots, replacing slow linear scans with logarithmic lookups.
+2. **HNSW Vector Similarity Search**:
+   - Computes Cosine Similarity metrics in native Java to return the top nearest neighbor embeddings.
+3. **Automatic Secondary Index Updates**:
+   - Secondary indexes automatically stay synchronized during record inserts, updates, and deletes.
+4. **Foreign Key Rule Enforcement**:
+   - Enforces `RESTRICT` and `CASCADE` rules during record mutations to maintain relational data integrity across tables.
