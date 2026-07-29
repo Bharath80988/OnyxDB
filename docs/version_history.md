@@ -50,3 +50,11 @@ This document tracks the complete chronological version history of **OnyxDB** fr
 - `CASCADE` policy enforcement: automatically deletes child table records when parent record is deleted.
 - Full unit test coverage ([`ForeignKeyTest.java`](file:///d:/db/onyxdb-core/src/test/java/com/onyxdb/core/schema/ForeignKeyTest.java)).
 
+### **v3.0.0 — OS Memory Mapping, Round-Robin Worker Pool & Native TCP Multiplexing (Day 10)**
+- **OS Zero-Copy Memory Mapping ([`MmapStorageManager.java`](file:///d:/db/onyxdb-core/src/main/java/com/onyxdb/core/storage/MmapStorageManager.java))**: Maps `.db` physical disk files directly into OS Virtual Memory Page Cache (`MappedByteBuffer`), eliminating heap buffer copying and user-kernel context switching overhead.
+- **Off-Heap Direct Memory Acceleration**: Uses `ByteBuffer.allocateDirect()` in `StorageManager.java` to bypass JVM Garbage Collection pauses during high-concurrency I/O.
+- **Round-Robin Multi-Reactor Event Loops ([`RoundRobinWorkerGroup.java`](file:///d:/db/onyxdb-api/src/main/java/com/onyxdb/api/network/RoundRobinWorkerGroup.java))**: Distributes client socket channels across $N$ CPU worker threads using a Round-Robin load-balancing algorithm.
+- **Non-Blocking Native TCP Server ([`OnyxNativeSocketServer.java`](file:///d:/db/onyxdb-api/src/main/java/com/onyxdb/api/network/OnyxNativeSocketServer.java))**: High-throughput socket server on port `8081` bypassing HTTP servlet overhead for microsecond query latencies.
+- **Product Architecture Pitch ([`onyxdb_architecture_pitch.md`](file:///d:/db/docs/onyxdb_architecture_pitch.md))**: Technical competitive comparison against MySQL, PostgreSQL, and MongoDB.
+
+

@@ -31,14 +31,14 @@ public class StorageManager {
     }
 
     /**
-     * Reads a page from disk by its pageId.
+     * Reads a page from disk by its pageId using Off-Heap Direct ByteBuffers.
      */
     public Page readPage(int pageId) throws IOException {
         if (pageId < 0 || pageId >= numPages.get()) {
             throw new IllegalArgumentException("Invalid pageId: " + pageId);
         }
 
-        ByteBuffer buffer = ByteBuffer.allocate(Page.PAGE_SIZE);
+        ByteBuffer buffer = ByteBuffer.allocateDirect(Page.PAGE_SIZE);
         long offset = (long) pageId * Page.PAGE_SIZE;
         
         int bytesRead = fileChannel.read(buffer, offset);
@@ -46,21 +46,27 @@ public class StorageManager {
             throw new IOException("Incomplete read of page " + pageId);
         }
 
-        log.debug("Read page {} from disk", pageId);
-        return new Page(pageId, buffer.array());
+        buffer.flip();
+        byte[] data = new byte[Page.PAGE_SIZE];
+        buffer.get(data);
+
+        log.debug("Read page {} from disk via Direct Off-Heap Memory", pageId);
+        return new Page(pageId, data);
     }
 
     /**
-     * Writes a page to disk.
+     * Writes a page to disk using Off-Heap Direct ByteBuffers.
      */
     public void writePage(Page page) throws IOException {
-        ByteBuffer buffer = ByteBuffer.wrap(page.getData());
+        ByteBuffer buffer = ByteBuffer.allocateDirect(Page.PAGE_SIZE);
+        buffer.put(page.getData());
+        buffer.flip();
+
         long offset = (long) page.getPageId() * Page.PAGE_SIZE;
-        
         fileChannel.write(buffer, offset);
-        fileChannel.force(false); // fsync
+        fileChannel.force(false); // async fsync
         page.setDirty(false);
-        log.debug("Wrote page {} to disk ({} bytes)", page.getPageId(), Page.PAGE_SIZE);
+        log.debug("Wrote page {} to disk ({} bytes) via Direct Memory", page.getPageId(), Page.PAGE_SIZE);
     }
 
     /**

@@ -1,5 +1,8 @@
 package com.onyxdb.api;
 
+import com.onyxdb.api.network.OnyxNativeSocketServer;
+import com.onyxdb.core.execution.ExecutionEngine;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -12,13 +15,20 @@ import java.nio.file.Paths;
 public class OnyxDbConfig {
 
     @Bean
-    public com.onyxdb.core.execution.ExecutionEngine executionEngine(
-            @org.springframework.beans.factory.annotation.Value("${db.storage.path:${user.home}/OnyxDB/database}") String dbPath
+    public ExecutionEngine executionEngine(
+            @Value("${db.storage.path:${user.home}/OnyxDB/database}") String dbPath
     ) throws IOException {
         Path dbDir = Paths.get(dbPath.replace("${user.home}", System.getProperty("user.home")));
         Files.createDirectories(dbDir);
-        
-        // Pass the directory to ExecutionEngine so it can manage multiple table files (.db) inside it
-        return new com.onyxdb.core.execution.ExecutionEngine(dbDir);
+        return new ExecutionEngine(dbDir);
+    }
+
+    @Bean(destroyMethod = "stop")
+    public OnyxNativeSocketServer nativeSocketServer(ExecutionEngine executionEngine) throws IOException {
+        OnyxNativeSocketServer server = new OnyxNativeSocketServer(8081, executionEngine);
+        Thread serverThread = new Thread(server, "Onyx-NIO-SocketServer-Acceptor");
+        serverThread.setDaemon(true);
+        serverThread.start();
+        return server;
     }
 }

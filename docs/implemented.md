@@ -3,6 +3,8 @@
 Below is a comprehensive list of all implemented functionalities in OnyxDB that are currently live and production-ready.
 
 ## Core Storage Engine
+- **OS-Level Memory-Mapped Paging (`mmap`)**: Zero-copy OS virtual memory page cache mapping (`MmapStorageManager.java`) bypassing heap allocations and context switching.
+- **Off-Heap Direct Memory Acceleration**: `ByteBuffer.allocateDirect()` in `StorageManager.java` bypassing JVM GC pauses.
 - **Write-Ahead Logging (WAL)**: Robust crash recovery via `.wal` append-only logs, guaranteeing ACID durability.
 - **B+ Tree Indexing**: The foundational data structure ensuring O(log n) lookups, inserts, updates, and deletes.
 - **Disk-Backed Paging**: Data is persisted to disk in 8KB pages to maximize OS-level cache hits.
@@ -16,9 +18,9 @@ Below is a comprehensive list of all implemented functionalities in OnyxDB that 
 - **Exact KNN Search**: Cosine Similarity distance calculations executed in native Java to return Top-K nearest neighbors instantly.
 
 ## API & Networking
+- **Round-Robin Multi-Reactor TCP Server**: High-throughput non-blocking NIO TCP socket server on port `8081` with Round-Robin worker thread load balancing (`RoundRobinWorkerGroup.java`).
 - **Role-Based Access Control (RBAC)**: Secure endpoints differentiating `ADMIN` (read/write/update/delete/index) and `READ_ONLY` roles.
-- **Native JSON over HTTP**: Native REST protocol over HTTP.
-- **Spring Boot Embedded Tomcat**: Concurrent HTTP handling for multi-threaded queries.
+- **Native JSON over HTTP & TCP**: Dual-protocol payload routing over HTTP REST and Native TCP sockets.
 - **Multi-Table Dynamic Routing**: The engine intercepts the `"table"` field in JSON payloads and dynamically routes queries to `<table_name>.db`.
 
 ## Operations

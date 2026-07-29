@@ -7,6 +7,8 @@ Comprehensive roadmap for upcoming features, optimizations, and infrastructural 
 - [x] **Update & Delete**: Add robust mutative and destructive B+ Tree operations with $O(\log N)$ binary search node indexing.
 - [x] **Secondary Indexes**: Extend the B+ Tree architecture to support non-primary key indexing.
 - [x] **Schema Normalization**: Implement cross-table relational links (Foreign Keys) and normal forms for structured data mapping.
+- [x] **OS-Level Memory Mapping (`mmap`)**: Zero-copy kernel virtual memory page cache mapping (`MmapStorageManager.java`).
+- [x] **Round-Robin Multi-Reactor TCP Server**: High-throughput non-blocking TCP socket server with Round-Robin worker load balancing (`OnyxNativeSocketServer.java`).
 - [ ] **Transaction Isolation**: Introduce Multiversion Concurrency Control (MVCC) for Snapshot Isolation without locking reads (ACID Isolation).
 
 ## Distributed Systems

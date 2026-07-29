@@ -4,8 +4,10 @@ This document serves as the single source of truth for the current state, health
 
 ---
 
-## 🟢 Completed Capabilities (v2.5.0)
+## 🟢 Completed Capabilities (v3.0.0)
 
+- [x] **OS-Level Memory Mapping (`mmap`)**: Zero-copy OS virtual memory page cache mapping (`MmapStorageManager.java`) bypassing heap memory copies and context switching.
+- [x] **Round-Robin Multi-Reactor TCP Server**: High-throughput non-blocking TCP socket server on port `8081` with Round-Robin worker load balancing (`RoundRobinWorkerGroup.java`).
 - [x] **Primary B+ Tree Indexing**: $O(\log N)$ inserts, lookups, splits, updates, and deletes over 8KB disk pages.
 - [x] **Secondary B+ Tree Indexing**: $O(\log N)$ secondary index scans for non-primary key fields (`email`, `role`, `status`) with automatic mutation synchronization.
 - [x] **Schema Normalization & Foreign Key Constraints**: Relational cross-table Foreign Key enforcement (`RESTRICT` / `CASCADE`) with persistent `.schema` metadata storage (`SchemaManager.java`).

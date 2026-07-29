@@ -66,40 +66,31 @@ This document catalogs all major source files across the **OnyxDB** codebase, ou
 * **Dependencies:** `ForeignKeyConstraint.java`, Java Object Streams.
 * **Used By:** `ExecutionEngine.java`, `ForeignKeyTest.java`.
 
+### 8. `MmapStorageManager.java`
+* **Path:** [`onyxdb-core/src/main/java/com/onyxdb/core/storage/MmapStorageManager.java`](file:///d:/db/onyxdb-core/src/main/java/com/onyxdb/core/storage/MmapStorageManager.java)
+* **Purpose:** OS-level Zero-Copy memory-mapped storage engine.
+* **Responsibilities:** Maps `.db` files directly into OS Virtual Memory Page Cache using `MappedByteBuffer`.
+* **Dependencies:** Java NIO `FileChannel`, `MappedByteBuffer`.
+* **Used By:** `BufferPool.java`, `ExecutionEngine.java`, `MmapStorageManagerTest.java`.
+
 ---
 
-## 🌐 `onyxdb-api` REST Layer Files
+## 🌐 `onyxdb-api` Network Layer Files
 
-### 7. `QueryController.java`
-* **Path:** [`onyxdb-api/src/main/java/com/onyxdb/api/QueryController.java`](file:///d:/db/onyxdb-api/src/main/java/com/onyxdb/api/QueryController.java)
-* **Purpose:** REST API endpoint handling HTTP requests at `/api/query`.
-* **Responsibilities:**
-  - Enforces Role-Based Access Control (RBAC) Bearer token security.
-  - Rejects unauthenticated or forbidden requests with standard HTTP status codes (`401`, `403`).
-* **Dependencies:** `QueryService`, Spring Web MVC annotations.
-* **Used By:** HTTP REST clients, `onyxdb-dashboard`.
-
-### 8. `QueryService.java`
-* **Path:** [`onyxdb-api/src/main/java/com/onyxdb/api/QueryService.java`](file:///d:/db/onyxdb-api/src/main/java/com/onyxdb/api/QueryService.java)
-* **Purpose:** Spring Service wrapping `ExecutionEngine` logic.
-* **Responsibilities:**
-  - Acts as transaction boundary and executes `@CacheEvict` on database mutations.
-* **Dependencies:** `ExecutionEngine`.
-* **Used By:** `QueryController.java`.
+### 9. `OnyxNativeSocketServer.java` & `RoundRobinWorkerGroup.java`
+* **Path:** [`onyxdb-api/src/main/java/com/onyxdb/api/network/OnyxNativeSocketServer.java`](file:///d:/db/onyxdb-api/src/main/java/com/onyxdb/api/network/OnyxNativeSocketServer.java)
+* **Purpose:** High-performance non-blocking NIO TCP socket server on port `8081` with Round-Robin worker thread load balancing.
+* **Responsibilities:** Bypasses HTTP REST servlet overhead for microsecond query latencies across CPU worker event loops.
+* **Dependencies:** `ServerSocketChannel`, `Selector`, `ExecutionEngine`.
+* **Used By:** `OnyxDbConfig.java`, `NativeSocketServerTest.java`.
 
 ---
 
 ## 🎨 `onyxdb-dashboard` UI Files
 
-### 9. `App.tsx`
+### 10. `App.tsx`
 * **Path:** `onyxdb-dashboard/src/App.tsx`
 * **Purpose:** Main React application entry point and layout shell.
-* **Responsibilities:** Assembles top Header, left Sidebar, theme provider, and active tab content.
-
-### 10. `VisualQueryBuilder.tsx`
-* **Path:** `onyxdb-dashboard/src/VisualQueryBuilder.tsx`
-* **Purpose:** Drag-and-drop React Flow visual pipeline builder for query construction.
-* **Responsibilities:** Converts visual node graphs into structured OnyxDB JSON queries.
 
 ---
 
@@ -108,4 +99,7 @@ This document catalogs all major source files across the **OnyxDB** codebase, ou
 ### 11. `query_guide.md`
 * **Path:** [`docs/query_guide.md`](file:///d:/db/docs/query_guide.md)
 * **Purpose:** Authoritative developer reference manual for all simple and complex query patterns.
-* **Responsibilities:** Documents authentication, JSON payload formats, relational foreign key constraints (`RESTRICT` / `CASCADE`), vector search, and complex index scans.
+
+### 12. `onyxdb_architecture_pitch.md`
+* **Path:** [`docs/onyxdb_architecture_pitch.md`](file:///d:/db/docs/onyxdb_architecture_pitch.md)
+* **Purpose:** Technical competitive breakdown and pitch matrix vs MySQL, PostgreSQL, and MongoDB.
