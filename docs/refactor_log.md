@@ -30,3 +30,7 @@ This document maintains an audit trail of all refactoring, cleanup, structural, 
 - Created [`docs/version_history.md`](./version_history.md): Chronological version timeline.
 - Created [`docs/paths.md`](./paths.md): Developer path reference guide.
 - Overhauled [`README.md`](file:///d:/db/README.md): Updated version to v2.4.0 with complete feature overview and usage guide.
+
+### 6. Roadmap Subsystem Restructuring & Build Verification
+- **v4.0.0 Master Architecture Roadmap:** Overhauled [`docs/roadmap.md`](./roadmap.md) into 8 core subsystem categories (Storage, Indexing & Optimization, AI & Vector Engine, Networking, Query Engine, DX & Distribution, Onyx Studio Visual IDE, Enterprise Features).
+- **Unit Test Suite Verification:** Executed full Maven test suite (`onyxdb-core` and `onyxdb-api`), confirming 100% test pass rate across storage, WAL, B+ tree indexing, and non-blocking native socket server.
