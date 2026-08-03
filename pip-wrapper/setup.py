@@ -19,9 +19,7 @@ setup(
             'onyxdb=onyxdb.cli:main',
         ],
     },
-    install_requires=[
-        'requests'
-    ],
+    install_requires=[],
     classifiers=[
         'Programming Language :: Python :: 3',
         'License :: OSI Approved :: MIT License',

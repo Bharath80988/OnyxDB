@@ -1,7 +1,7 @@
 import os
 import sys
 import subprocess
-import requests
+import urllib.request
 
 JAR_NAME = 'onyxdb-api-0.1.3.jar'
 JAR_PATH = os.path.join(os.path.dirname(__file__), JAR_NAME)
@@ -10,11 +10,9 @@ DOWNLOAD_URL = f"https://github.com/Bharath80988/OnyxDB/releases/download/v0.1.3
 def download_jar():
     print(f"Downloading OnyxDB engine from {DOWNLOAD_URL}...")
     try:
-        response = requests.get(DOWNLOAD_URL, stream=True)
-        response.raise_for_status()
-        with open(JAR_PATH, 'wb') as f:
-            for chunk in response.iter_content(chunk_size=8192):
-                f.write(chunk)
+        req = urllib.request.Request(DOWNLOAD_URL, headers={'User-Agent': 'OnyxDB-Pip'})
+        with urllib.request.urlopen(req) as response, open(JAR_PATH, 'wb') as out_file:
+            out_file.write(response.read())
     except Exception as e:
         print("Failed to download OnyxDB jar. Make sure the GitHub release exists!")
         print(e)

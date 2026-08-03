@@ -2,34 +2,39 @@
 
 const fs = require('fs');
 const path = require('path');
+const https = require('https');
 const { spawn, execSync } = require('child_process');
-const axios = require('axios');
 
 const JAR_NAME = 'onyxdb-api-0.1.3.jar';
 const JAR_PATH = path.join(__dirname, JAR_NAME);
 const DOWNLOAD_URL = `https://github.com/Bharath80988/OnyxDB/releases/download/v0.1.3/${JAR_NAME}`;
 
-async function downloadJar() {
-    console.log(`Downloading OnyxDB engine from ${DOWNLOAD_URL}...`);
-    try {
-        const response = await axios({
-            method: 'GET',
-            url: DOWNLOAD_URL,
-            responseType: 'stream'
-        });
+function downloadJar() {
+    return new Promise((resolve, reject) => {
+        console.log(`Downloading OnyxDB engine from ${DOWNLOAD_URL}...`);
+        const file = fs.createWriteStream(JAR_PATH);
+        
+        function handleResponse(response) {
+            if (response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
+                https.get(response.headers.location, handleResponse).on('error', reject);
+                return;
+            }
+            if (response.statusCode !== 200) {
+                fs.unlink(JAR_PATH, () => {});
+                reject(new Error(`Failed to download OnyxDB jar (HTTP ${response.statusCode}). Make sure the GitHub release exists!`));
+                return;
+            }
+            response.pipe(file);
+            file.on('finish', () => {
+                file.close(resolve);
+            });
+        }
 
-        const writer = fs.createWriteStream(JAR_PATH);
-        response.data.pipe(writer);
-
-        return new Promise((resolve, reject) => {
-            writer.on('finish', resolve);
-            writer.on('error', reject);
+        https.get(DOWNLOAD_URL, handleResponse).on('error', (err) => {
+            fs.unlink(JAR_PATH, () => {});
+            reject(err);
         });
-    } catch (err) {
-        console.error('Failed to download OnyxDB jar. Make sure the GitHub release exists!');
-        console.error(err.message);
-        process.exit(1);
-    }
+    });
 }
 
 function checkJava() {

@@ -34,3 +34,9 @@ This document maintains an audit trail of all refactoring, cleanup, structural, 
 ### 6. Roadmap Subsystem Restructuring & Build Verification
 - **v4.0.0 Master Architecture Roadmap:** Overhauled [`docs/roadmap.md`](./roadmap.md) into 8 core subsystem categories (Storage, Indexing & Optimization, AI & Vector Engine, Networking, Query Engine, DX & Distribution, Onyx Studio Visual IDE, Enterprise Features).
 - **Unit Test Suite Verification:** Executed full Maven test suite (`onyxdb-core` and `onyxdb-api`), confirming 100% test pass rate across storage, WAL, B+ tree indexing, and non-blocking native socket server.
+
+### 7. Zero-Dependency Client SDK Wrappers & Documentation Overhaul
+- **Node.js Wrapper Refactoring (`npm-wrapper`):** Refactored `index.js` to use native Node.js `https` module with automatic HTTP redirect following, eliminating external `axios` dependency for `npx onyxdb`.
+- **Python Wrapper Refactoring (`pip-wrapper`):** Updated `cli.py` and `setup.py` to use standard library `urllib.request`, removing external `requests` dependency for `pip install onyxdb`.
+- **Root README Overhaul:** Overhauled [`README.md`](file:///d:/db/README.md) to feature quick package installation links (PyPI, NPM, Spring Boot JAR), a step-by-step startup guide, comprehensive query action cURL/payload tutorial, and **Onyx Studio** frontend usage guide.
+

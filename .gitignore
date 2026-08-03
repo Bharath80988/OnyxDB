@@ -16,3 +16,6 @@ dist/
 *.ps1
 
 # Secrets
+
+# Jar Binaries
+*.jar

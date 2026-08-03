@@ -18,6 +18,7 @@ This document summarizes the current status, active capabilities, upcoming featu
 - [x] **LRU Buffer Pool Memory Cache**: Disk page caching with LRU page eviction policy.
 - [x] **Embedded Executable Uber-JAR**: Bundled React frontend static assets inside a standalone Java executable.
 - [x] **Consolidated Documentation Suite**: Organized documentation directory structure ([`docs/`](./)).
+- [x] **Multi-Language Package Distribution**: Published zero-dependency Python package (`pip install onyxdb`) and Node.js package (`npx onyxdb`).
 
 ---
 
