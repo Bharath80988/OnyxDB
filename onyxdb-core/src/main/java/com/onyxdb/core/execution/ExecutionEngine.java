@@ -99,12 +99,30 @@ public class ExecutionEngine {
         });
     }
 
+    public List<String> execute(String oqsQuery) throws Exception {
+        if (oqsQuery == null || oqsQuery.trim().isEmpty()) {
+            throw new IllegalArgumentException("Query string cannot be empty.");
+        }
+        return execute(parseOqsToQueryNode(oqsQuery));
+    }
+
     public List<String> execute(Map<String, Object> queryNode) throws Exception {
+        if (queryNode.containsKey("oqs")) {
+            return execute((String) queryNode.get("oqs"));
+        }
+        
         String action = (String) queryNode.get("action");
+        if (action == null && queryNode.containsKey("query")) {
+            return execute((String) queryNode.get("query"));
+        }
+        if (action != null && (action.equalsIgnoreCase("oqs") || action.equalsIgnoreCase("raw"))) {
+            return execute((String) queryNode.get("query"));
+        }
+        
         String table = (String) queryNode.get("table");
         
         if (action == null) {
-            throw new IllegalArgumentException("Query must contain an 'action' field");
+            throw new IllegalArgumentException("Query must contain an 'action' or 'oqs' field");
         }
         if (table == null) {
             throw new IllegalArgumentException("Query must contain a 'table' field");
@@ -582,5 +600,235 @@ public class ExecutionEngine {
         }
 
         return null;
+    }
+
+    /**
+     * Parses human-readable Onyx Query Syntax (OQS) strings into structured query nodes.
+     */
+    public Map<String, Object> parseOqsToQueryNode(String query) {
+        if (query == null || query.trim().isEmpty()) {
+            throw new IllegalArgumentException("OQS query cannot be empty");
+        }
+
+        String q = query.trim();
+        Map<String, Object> node = new HashMap<>();
+
+        // 1. GET users 101  or  GET users:101
+        if (q.toUpperCase().startsWith("GET ")) {
+            String rest = q.substring(4).trim();
+            String table;
+            Integer id = null;
+
+            if (rest.contains(":")) {
+                String[] parts = rest.split(":", 2);
+                table = parts[0].trim();
+                try {
+                    id = Integer.parseInt(parts[1].trim());
+                } catch (NumberFormatException ignored) {}
+            } else {
+                String[] parts = rest.split("\\s+", 2);
+                table = parts[0].trim();
+                if (parts.length > 1) {
+                    try {
+                        id = Integer.parseInt(parts[1].trim());
+                    } catch (NumberFormatException ignored) {}
+                }
+            }
+
+            node.put("action", "select");
+            node.put("table", table);
+            if (id != null) {
+                node.put("id", id);
+            }
+            return node;
+        }
+
+        // 2. FIND users WHERE status = ACTIVE  or  FIND users
+        if (q.toUpperCase().startsWith("FIND ") || q.toUpperCase().startsWith("SELECT ")) {
+            node.put("action", "select");
+            String rest = q.startsWith("FIND ") || q.startsWith("find ") ? q.substring(5).trim() : q.substring(7).trim();
+            
+            if (rest.toUpperCase().startsWith("* FROM ")) {
+                rest = rest.substring(7).trim();
+            }
+
+            String table;
+            if (rest.toUpperCase().contains(" WHERE ")) {
+                String[] parts = rest.split("(?i)\\s+WHERE\\s+", 2);
+                table = parts[0].trim();
+                String cond = parts[1].trim();
+                Map<String, Object> whereMap = new HashMap<>();
+                if (cond.contains("=")) {
+                    String[] kv = cond.split("=", 2);
+                    String k = kv[0].trim();
+                    String v = kv[1].trim().replaceAll("^['\"]|['\"]$", "");
+                    if (k.equalsIgnoreCase("id")) {
+                        try {
+                            node.put("id", Integer.parseInt(v));
+                            return node;
+                        } catch (NumberFormatException ignored) {}
+                    }
+                    whereMap.put(k, v);
+                }
+                node.put("where", whereMap);
+            } else {
+                String[] tokens = rest.split("\\s+");
+                table = tokens[0].trim();
+                if (tokens.length >= 3 && tokens[1].equalsIgnoreCase("WHERE") == false && !tokens[1].contains("=")) {
+                    // e.g. FIND users status = ACTIVE
+                    String k = tokens[1].trim();
+                    String v = tokens[tokens.length - 1].trim().replaceAll("^['\"]|['\"]$", "");
+                    Map<String, Object> whereMap = new HashMap<>();
+                    whereMap.put(k, v);
+                    node.put("where", whereMap);
+                }
+            }
+
+            node.put("table", table);
+            return node;
+        }
+
+        // 3. DELETE users 101  or  DELETE FROM users WHERE id = 101
+        if (q.toUpperCase().startsWith("DELETE ")) {
+            node.put("action", "delete");
+            String rest = q.substring(7).trim();
+            if (rest.toUpperCase().startsWith("FROM ")) {
+                rest = rest.substring(5).trim();
+            }
+
+            if (rest.toUpperCase().contains(" WHERE ")) {
+                String[] parts = rest.split("(?i)\\s+WHERE\\s+", 2);
+                node.put("table", parts[0].trim());
+                String cond = parts[1].trim();
+                if (cond.contains("=")) {
+                    String[] kv = cond.split("=", 2);
+                    String v = kv[1].trim().replaceAll("^['\"]|['\"]$", "");
+                    try {
+                        node.put("id", Integer.parseInt(v));
+                    } catch (NumberFormatException ignored) {}
+                }
+            } else {
+                String[] parts = rest.split("[:\\s]+", 2);
+                node.put("table", parts[0].trim());
+                if (parts.length > 1) {
+                    try {
+                        node.put("id", Integer.parseInt(parts[1].trim()));
+                    } catch (NumberFormatException ignored) {}
+                }
+            }
+            return node;
+        }
+
+        // 4. INDEX users ON email  or  INDEX users email  or  CREATE INDEX ON users (email)
+        if (q.toUpperCase().startsWith("INDEX ") || q.toUpperCase().startsWith("CREATE INDEX ")) {
+            node.put("action", "create_index");
+            String rest = q.toUpperCase().startsWith("CREATE INDEX ") ? q.substring(13).trim() : q.substring(6).trim();
+            if (rest.toUpperCase().startsWith("ON ")) {
+                rest = rest.substring(3).trim();
+            }
+            if (rest.contains("(")) {
+                String table = rest.substring(0, rest.indexOf("(")).trim();
+                String field = rest.substring(rest.indexOf("(") + 1, rest.indexOf(")")).trim();
+                node.put("table", table);
+                node.put("field", field);
+            } else {
+                String[] parts = rest.split("(?i)\\s+ON\\s+|\\s+", 2);
+                node.put("table", parts[0].trim());
+                if (parts.length > 1) {
+                    node.put("field", parts[1].replaceAll("[()\\s]", "").trim());
+                }
+            }
+            return node;
+        }
+
+        // 5. UPDATE users 101 SET status = INACTIVE
+        if (q.toUpperCase().startsWith("UPDATE ")) {
+            node.put("action", "update");
+            String rest = q.substring(7).trim();
+            String[] parts = rest.split("(?i)\\s+SET\\s+", 2);
+            String target = parts[0].trim();
+            String[] targetParts = target.split("\\s+");
+            String table = targetParts[0].trim();
+            int id = Integer.parseInt(targetParts[1].trim());
+
+            Map<String, Object> data = new HashMap<>();
+            data.put("id", id);
+
+            if (parts.length > 1) {
+                String assignments = parts[1].trim();
+                for (String assign : assignments.split(",")) {
+                    String[] kv = assign.split("=", 2);
+                    if (kv.length == 2) {
+                        data.put(kv[0].trim(), kv[1].trim().replaceAll("^['\"]|['\"]$", ""));
+                    }
+                }
+            }
+            node.put("table", table);
+            node.put("data", data);
+            return node;
+        }
+
+        // 6. INSERT INTO users { "id": 101, ... }  or  INSERT users { "id": 101, ... }
+        if (q.toUpperCase().startsWith("INSERT ")) {
+            node.put("action", "insert");
+            String rest = q.substring(7).trim();
+            if (rest.toUpperCase().startsWith("INTO ")) {
+                rest = rest.substring(5).trim();
+            }
+
+            int braceIdx = rest.indexOf('{');
+            if (braceIdx != -1) {
+                String table = rest.substring(0, braceIdx).trim();
+                node.put("table", table);
+                String jsonPart = rest.substring(braceIdx).trim();
+                try {
+                    Map<String, Object> dataMap = parseSimpleJsonObject(jsonPart);
+                    node.put("data", dataMap);
+                } catch (Exception e) {
+                    throw new IllegalArgumentException("Invalid JSON payload in INSERT query: " + jsonPart, e);
+                }
+                return node;
+            }
+        }
+
+        throw new IllegalArgumentException("Unrecognized Onyx Query Syntax: " + query);
+    }
+
+    private Map<String, Object> parseSimpleJsonObject(String jsonStr) {
+        Map<String, Object> map = new HashMap<>();
+        String s = jsonStr.trim();
+        if (s.startsWith("{")) s = s.substring(1);
+        if (s.endsWith("}")) s = s.substring(0, s.length() - 1);
+        
+        List<String> pairs = new ArrayList<>();
+        StringBuilder current = new StringBuilder();
+        boolean inQuotes = false;
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            if (c == '"') inQuotes = !inQuotes;
+            if (c == ',' && !inQuotes) {
+                pairs.add(current.toString());
+                current = new StringBuilder();
+            } else {
+                current.append(c);
+            }
+        }
+        if (current.length() > 0) pairs.add(current.toString());
+        
+        for (String pair : pairs) {
+            String[] kv = pair.split(":", 2);
+            if (kv.length == 2) {
+                String key = kv[0].trim().replaceAll("^\"|\"$", "");
+                String valStr = kv[1].trim().replaceAll("^\"|\"$", "");
+                if (key.equalsIgnoreCase("id")) {
+                    try {
+                        map.put("id", Integer.parseInt(valStr));
+                        continue;
+                    } catch (NumberFormatException ignored) {}
+                }
+                map.put(key, valStr);
+            }
+        }
+        return map;
     }
 }

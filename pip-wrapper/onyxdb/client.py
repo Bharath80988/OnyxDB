@@ -1,5 +1,4 @@
 import requests
-import argparse
 import json
 
 class OnyxDB:
@@ -57,41 +56,3 @@ class OnyxDB:
     def query(self, raw_json):
         """Execute raw JSON query dictionary."""
         return self._post(raw_json)
-
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="OnyxDB Terminal CLI")
-    parser.add_argument("--host", default="http://localhost:8080", help="OnyxDB API Host")
-    parser.add_argument("--token", default="admin-secret-key", help="Authorization Token")
-    subparsers = parser.add_subparsers(dest="command")
-
-    # OQS Command
-    oqs_parser = subparsers.add_parser("oqs", help="Execute Onyx Query Syntax string")
-    oqs_parser.add_argument("query", type=str, help="OQS String (e.g., 'GET users 101')")
-
-    # Insert Command
-    insert_parser = subparsers.add_parser("insert", help="Insert a record")
-    insert_parser.add_argument("--table", required=True, help="Table name")
-    insert_parser.add_argument("id", type=int, help="Record ID")
-    insert_parser.add_argument("data", type=str, help="JSON Data string")
-
-    # Select Command
-    select_parser = subparsers.add_parser("get", help="Get a record by ID")
-    select_parser.add_argument("--table", required=True, help="Table name")
-    select_parser.add_argument("id", type=int, help="Record ID")
-
-    args = parser.parse_args()
-    db = OnyxDB(host=args.host, token=args.token)
-
-    if args.command == "oqs":
-        result = db.oqs(args.query)
-        print(json.dumps(result, indent=2))
-    elif args.command == "insert":
-        data = json.loads(args.data)
-        result = db.insert(args.table, args.id, data)
-        print(json.dumps(result, indent=2))
-    elif args.command == "get":
-        result = db.get(args.table, args.id)
-        print(json.dumps(result, indent=2))
-    else:
-        parser.print_help()

@@ -50,6 +50,13 @@ This document tracks the complete chronological version history of **OnyxDB** fr
 - `CASCADE` policy enforcement: automatically deletes child table records when parent record is deleted.
 - Unit test coverage ([`ForeignKeyTest.java`](file:///d:/db/onyxdb-core/src/test/java/com/onyxdb/core/schema/ForeignKeyTest.java)).
 
+### v0.2.0 — Onyx Query Syntax, Simplified SDKs & Professional Baseline
+- **Onyx Query Syntax (OQS)**: Native string query parser (`ExecutionEngine.java`) for `GET`, `FIND`, `INSERT`, `UPDATE`, `DELETE`, and `INDEX` commands without JSON payload verbosity.
+- **Python SDK Enhancements (`onyxdb.py` & `pip-wrapper`)**: High-level helper methods (`db.get()`, `db.find()`, `db.insert()`, `db.update()`, `db.delete()`, `db.oqs()`).
+- **Node.js Client SDK (`npm-wrapper`)**: Exported `OnyxClient` helper class for Node applications.
+- **Pure Java JSON Parser**: Embedded zero-dependency JSON parser (`parseSimpleJsonObject`) in `onyxdb-core`.
+- **Zero-Emoji Professional Documentation**: Clean, standardized documentation across `README.md` and module READMEs.
+
 ### v3.0.0 — OS Memory Mapping, Round-Robin Worker Pool & Native TCP Multiplexing
 - **OS Zero-Copy Memory Mapping ([`MmapStorageManager.java`](file:///d:/db/onyxdb-core/src/main/java/com/onyxdb/core/storage/MmapStorageManager.java))**: Maps `.db` physical disk files directly into OS Virtual Memory Page Cache (`MappedByteBuffer`), eliminating heap buffer copying and user-kernel context switching overhead.
 - **Off-Heap Direct Memory Acceleration**: Uses `ByteBuffer.allocateDirect()` in `StorageManager.java` to bypass JVM Garbage Collection pauses during high-concurrency I/O.

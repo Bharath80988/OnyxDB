@@ -3,11 +3,12 @@
 const fs = require('fs');
 const path = require('path');
 const https = require('https');
+const http = require('http');
 const { spawn, execSync } = require('child_process');
 
-const JAR_NAME = 'onyxdb-api-0.1.3.jar';
+const JAR_NAME = 'onyxdb-api-0.2.0.jar';
 const JAR_PATH = path.join(__dirname, JAR_NAME);
-const DOWNLOAD_URL = `https://github.com/Bharath80988/OnyxDB/releases/download/v0.1.3/${JAR_NAME}`;
+const DOWNLOAD_URL = `https://github.com/Bharath80988/OnyxDB/releases/download/v0.2.0/${JAR_NAME}`;
 
 function downloadJar() {
     return new Promise((resolve, reject) => {
@@ -66,4 +67,77 @@ async function startOnyxDB() {
     });
 }
 
-startOnyxDB();
+class OnyxClient {
+    constructor(host = 'http://localhost:8080', token = 'admin-secret-key') {
+        this.host = host.replace(/\/$/, '');
+        this.token = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+    }
+
+    async _request(payload) {
+        const url = new URL(`${this.host}/api/query`);
+        const bodyStr = JSON.stringify(payload);
+
+        return new Promise((resolve, reject) => {
+            const req = http.request(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': this.token,
+                    'Content-Length': Buffer.byteLength(bodyStr)
+                }
+            }, (res) => {
+                let data = '';
+                res.on('data', chunk => data += chunk);
+                res.on('end', () => {
+                    try {
+                        resolve(JSON.parse(data));
+                    } catch (e) {
+                        resolve({ status: 'error', raw: data });
+                    }
+                });
+            });
+
+            req.on('error', reject);
+            req.write(bodyStr);
+            req.end();
+        });
+    }
+
+    get(table, id) {
+        return this._request({ action: 'select', table, id });
+    }
+
+    find(table, where) {
+        return this._request({ action: 'select', table, where });
+    }
+
+    insert(table, id, data = {}) {
+        return this._request({ action: 'insert', table, data: { id, ...data } });
+    }
+
+    update(table, id, updates = {}) {
+        return this._request({ action: 'update', table, data: { id, ...updates } });
+    }
+
+    delete(table, id) {
+        return this._request({ action: 'delete', table, id });
+    }
+
+    createIndex(table, field) {
+        return this._request({ action: 'create_index', table, field });
+    }
+
+    vectorSearch(table, vector, k = 5) {
+        return this._request({ action: 'vector_search', table, vector, k });
+    }
+
+    oqs(queryString) {
+        return this._request({ oqs: queryString });
+    }
+}
+
+if (require.main === module) {
+    startOnyxDB();
+}
+
+module.exports = { OnyxClient, startOnyxDB };

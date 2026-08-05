@@ -1,25 +1,25 @@
-# OnyxDB (v3.0.0)
+# OnyxDB (v0.2.0)
 
 > **The Multi-Table Omni-Channel Database built on B+ Trees.**
 
-OnyxDB is a high-performance, local-first database built on B+ Tree page indexing, zero-copy OS virtual memory mapping (`mmap`), non-blocking NIO socket channels, and native AI KNN vector search. It features an embedded visual database visualizer (**Onyx Studio**) served directly from its standalone binary engine.
+OnyxDB is a high-performance, local-first database engine featuring B+ Tree page indexing, zero-copy OS virtual memory mapping (`mmap`), non-blocking NIO socket channels, and native AI KNN vector search. It includes an embedded database visualizer (**Onyx Studio**) served directly from its standalone binary engine.
 
 ---
 
-## 📦 Quick Installation & Links
+## Quick Installation & Links
 
 - **Python PyPI Package**: [![PyPI](https://img.shields.io/pypi/v/onyxdb.svg)](https://pypi.org/project/onyxdb/) `pip install onyxdb`
 - **Node.js NPM Package**: [![npm](https://img.shields.io/npm/v/onyxdb.svg)](https://www.npmjs.com/package/onyxdb) `npx onyxdb`
-- **Standalone Spring Boot Uber-JAR**: [GitHub Releases (v0.1.3)](https://github.com/Bharath80988/OnyxDB/releases)
+- **Standalone Java Uber-JAR**: [GitHub Releases (v0.2.0)](https://github.com/Bharath80988/OnyxDB/releases)
 - **Documentation Suite**: [`docs/`](./docs)
 
 ---
 
-## ⚡ How It Works & Step-by-Step Tutorial
+## Quickstart & Engine Startup
 
-### Step 1: Starting the OnyxDB Engine
+### Starting the OnyxDB Engine
 
-You can bootstrap OnyxDB using your preferred runtime environment:
+OnyxDB can be bootstrapped instantly using any runtime environment:
 
 #### Option A: Node.js (NPM)
 ```bash
@@ -33,98 +33,143 @@ onyxdb
 ```
 
 #### Option C: Standalone Executable Java Uber-JAR
-Download `onyxdb-api-0.1.3.jar` from [GitHub Releases](https://github.com/Bharath80988/OnyxDB/releases) and run:
+Download `onyxdb-api-0.2.0.jar` from [GitHub Releases](https://github.com/Bharath80988/OnyxDB/releases) and execute:
 ```bash
-java -jar onyxdb-api-0.1.3.jar
+java -jar onyxdb-api-0.2.0.jar
 ```
 
-Upon startup, OnyxDB will initialize:
+Upon initialization, OnyxDB starts the following services:
 - **HTTP REST API Server**: `http://localhost:8080`
 - **Zero-Copy Non-Blocking TCP Socket Server**: `localhost:8081`
-- **Onyx Studio Visual IDE Dashboard**: Embedded at `http://localhost:8080/`
+- **Onyx Studio Visual IDE Dashboard**: `http://localhost:8080/`
 
 ---
 
-### Step 2: Executing Queries
+## Simple Querying Options
 
-OnyxDB accepts structured JSON query payloads via HTTP `POST` to `http://localhost:8080/api/query` or directly over TCP socket connections on port `8081`.
+OnyxDB provides three intuitive ways to query data:
+1. **Onyx Query Syntax (OQS)**: Lightweight human-readable string commands.
+2. **Client SDK Methods**: High-level helper methods in Python and Node.js.
+3. **Structured JSON REST API**: Low-level REST endpoint queries.
 
-#### Authentication (Role-Based Access Control)
-Include an `Authorization` header with requests:
-- **Admin Access** (Full permissions: `insert`, `update`, `delete`, `select`, `create_index`, `create_foreign_key`):
+---
+
+### Method 1: Onyx Query Syntax (OQS)
+
+Onyx Query Syntax (OQS) allows executing plain-text query strings without verbose JSON structures:
+
+#### Point Fetch by ID
+```sql
+GET users 101
+```
+
+#### Filtered Record Search
+```sql
+FIND users WHERE status = ACTIVE
+```
+
+#### Insert Record
+```sql
+INSERT INTO users {"id": 101, "name": "Satoshi Nakamoto", "email": "satoshi@bitcoin.org", "status": "ACTIVE"}
+```
+
+#### Update Record
+```sql
+UPDATE users 101 SET status = INACTIVE
+```
+
+#### Delete Record
+```sql
+DELETE users 101
+```
+
+#### Create Secondary Index
+```sql
+INDEX users ON email
+```
+
+---
+
+### Method 2: High-Level Client SDKs
+
+#### Python SDK (`pip install onyxdb`)
+
+```python
+from onyxdb import OnyxDB
+
+# Connect to local OnyxDB engine
+db = OnyxDB(host="http://localhost:8080", token="admin-secret-key")
+
+# Insert record
+db.insert("users", 101, {"name": "Satoshi Nakamoto", "role": "ADMIN"})
+
+# Get record by ID
+user = db.get("users", 101)
+print(user)
+
+# Find records with matching criteria
+active_users = db.find("users", {"role": "ADMIN"})
+
+# Run Onyx Query Syntax (OQS) string query
+res = db.oqs("FIND users WHERE role = ADMIN")
+
+# Update record
+db.update("users", 101, {"status": "INACTIVE"})
+
+# Delete record
+db.delete("users", 101)
+```
+
+#### Node.js SDK (`npm install onyxdb`)
+
+```javascript
+const { OnyxClient } = require('onyxdb');
+
+const db = new OnyxClient('http://localhost:8080', 'admin-secret-key');
+
+async function main() {
+    // Insert record
+    await db.insert('users', 101, { name: 'Satoshi Nakamoto', role: 'ADMIN' });
+
+    // Get record by ID
+    const user = await db.get('users', 101);
+    console.log(user);
+
+    // Execute Onyx Query Syntax
+    const activeUsers = await db.oqs('FIND users WHERE role = ADMIN');
+    console.log(activeUsers);
+
+    // Delete record
+    await db.delete('users', 101);
+}
+
+main();
+```
+
+---
+
+### Method 3: HTTP REST API & Authentication
+
+HTTP queries are sent as `POST` requests to `http://localhost:8080/api/query`.
+
+#### Authorization Roles
+Include an `Authorization` header with all HTTP requests:
+- **Admin Role** (Full read, write, update, delete, indexing permissions):
   `Authorization: Bearer admin-secret-key`
-- **Read-Only Access** (Query permissions: `select`, `vector_search`):
+- **Read-Only Role** (Query and vector search permissions):
   `Authorization: Bearer readonly-secret-key`
 
----
+#### REST Examples
 
-#### Query Tutorial & Examples
-
-##### 1. Inserting Records into a Table
-Automatically creates the dynamic storage file (`users.db`) and inserts records into 8KB B+ Tree pages.
-
+##### 1. OQS Query Payload
 ```bash
 curl -X POST http://localhost:8080/api/query \
   -H "Authorization: Bearer admin-secret-key" \
   -H "Content-Type: application/json" \
-  -d '{
-    "action": "insert",
-    "table": "users",
-    "data": {
-      "id": 101,
-      "name": "Satoshi Nakamoto",
-      "email": "satoshi@bitcoin.org",
-      "role": "ADMIN",
-      "status": "ACTIVE"
-    }
-  }'
+  -d '{"oqs": "GET users 101"}'
 ```
 
-##### 2. Point Lookup by Primary Key
-Executes an $O(\log N)$ binary search lookup over leaf page slots.
-
-```bash
-curl -X POST http://localhost:8080/api/query \
-  -H "Authorization: Bearer readonly-secret-key" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "action": "select",
-    "table": "users",
-    "id": 101
-  }'
-```
-
-##### 3. Creating a Secondary B+ Tree Index
-Builds a secondary index on non-primary key attributes for fast lookup without scanning entire tables.
-
-```bash
-curl -X POST http://localhost:8080/api/query \
-  -H "Authorization: Bearer admin-secret-key" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "action": "create_index",
-    "table": "users",
-    "field": "email"
-  }'
-```
-
-##### 4. Querying by Secondary Index
-Routes execution directly through the secondary index tree in $O(\log N)$ time.
-
-```bash
-curl -X POST http://localhost:8080/api/query \
-  -H "Authorization: Bearer readonly-secret-key" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "action": "select",
-    "table": "users",
-    "where": { "email": "satoshi@bitcoin.org" }
-  }'
-```
-
-##### 5. AI Vector Search (KNN Cosine Similarity)
-Executes exact K-Nearest Neighbor vector search over embedded vector arrays.
-
+##### 2. AI Vector Search (KNN Cosine Similarity)
 ```bash
 curl -X POST http://localhost:8080/api/query \
   -H "Authorization: Bearer readonly-secret-key" \
@@ -137,9 +182,7 @@ curl -X POST http://localhost:8080/api/query \
   }'
 ```
 
-##### 6. Schema Normalization & Foreign Key Rules
-Enforces relational links between tables with automatic `.schema` disk persistence and deletion policies (`CASCADE` or `RESTRICT`).
-
+##### 3. Foreign Key Constraint Creation
 ```bash
 curl -X POST http://localhost:8080/api/query \
   -H "Authorization: Bearer admin-secret-key" \
@@ -154,67 +197,33 @@ curl -X POST http://localhost:8080/api/query \
   }'
 ```
 
-##### 7. Updating and Deleting Records
-```bash
-# Update Record in Place
-curl -X POST http://localhost:8080/api/query \
-  -H "Authorization: Bearer admin-secret-key" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "action": "update",
-    "table": "users",
-    "data": { "id": 101, "status": "INACTIVE" }
-  }'
+---
 
-# Delete Record and Shift Leaf Slots
-curl -X POST http://localhost:8080/api/query \
-  -H "Authorization: Bearer admin-secret-key" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "action": "delete",
-    "table": "users",
-    "id": 101
-  }'
-```
+## Onyx Studio Frontend Visual IDE
+
+When OnyxDB is running, navigate to **`http://localhost:8080`** in a web browser to access **Onyx Studio**.
+
+### Studio Features
+1. **Visual Database Explorer**: Inspect active tables, B+ Tree index structures, and foreign key rules.
+2. **Visual Query Builder**: Drag-and-drop node interface for building and testing queries.
+3. **System Telemetry & Monitoring**: Monitor LRU buffer pool hit ratios, active TCP event loop channels, and WAL mutation logs.
 
 ---
 
-### Step 3: Utilizing the Onyx Studio Frontend Visual IDE
+## Engine Architecture Highlights
 
-When OnyxDB is running, open **`http://localhost:8080`** in your browser to access **Onyx Studio**.
-
-#### Core Studio Features:
-
-1. **Visual Database Explorer**:
-   - Inspect active database tables (`users`, `orders`, `products`).
-   - View dynamic primary & secondary B+ Tree index structures.
-   - Explore persistent schema rules and relational foreign key linkages.
-
-2. **Drag-and-Drop Visual Query Builder**:
-   - Build complex queries visually without manually writing JSON objects.
-   - Connect query nodes, set filter criteria, and test query execution with real-time JSON response previewing.
-
-3. **Real-Time Telemetry & System Monitoring**:
-   - Track **LRU Buffer Pool Memory Cache** hit ratios.
-   - Monitor **Round-Robin TCP Worker Event Loops** and active channel connections.
-   - View live **Write-Ahead Logging (WAL)** mutation event streams for crash recovery verification.
+- **OS Virtual Memory Mapping (`MmapStorageManager.java`)**: Maps database files directly to OS kernel virtual memory pages via `MappedByteBuffer`, eliminating JVM garbage collection pauses.
+- **Round-Robin Multi-Reactor (`RoundRobinWorkerGroup.java`)**: Non-blocking Java NIO socket server distributing TCP channels across worker threads.
+- **Durability & Crash Recovery (`WriteAheadLog.java`)**: Append-only WAL transaction logging guaranteeing ACID compliance.
 
 ---
 
-## 🏛️ Engine Architecture Highlights
+## Documentation Suite
 
-- **OS Virtual Memory Mapping (`MmapStorageManager.java`)**: Maps storage files directly into OS kernel virtual memory pages using `MappedByteBuffer`, eliminating JVM heap garbage collection pauses and user-kernel copying overhead.
-- **Round-Robin Multi-Reactor (`RoundRobinWorkerGroup.java`)**: Non-blocking Java NIO socket server distributing TCP channels across CPU core worker threads.
-- **Durability & Recovery (`WriteAheadLog.java`)**: Sequential append-only WAL transaction logging guaranteeing ACID crash recovery.
-
----
-
-## 📚 Complete Documentation Suite
-
-Detailed guides, architectural blueprints, and specifications are located in [`docs/`](./docs):
+Additional specifications and guides are located in [`docs/`](./docs):
 - [Project Folder Structure](docs/structure.md)
 - [File Index and Component Catalog](docs/file_index.md)
-- [Master Architecture Roadmap (v4.0.0)](docs/roadmap.md)
+- [Master Architecture Roadmap](docs/roadmap.md)
 - [System Status & Capabilities](docs/status.md)
 - [Master Query Guide](docs/query_guide.md)
 - [Product Architecture Pitch & Database Comparison](docs/onyxdb_architecture_pitch.md)

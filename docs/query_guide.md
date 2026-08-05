@@ -22,7 +22,27 @@ Authorization: Bearer <token>
 
 ---
 
-## 2. Query Actions and Formats
+## 2. Onyx Query Syntax (OQS)
+
+OnyxDB supports string queries via the `"oqs"` key:
+
+```json
+{
+  "oqs": "GET users 101"
+}
+```
+
+### Supported OQS Commands:
+- **`GET <table> <id>`**: Point lookup by record primary key (`GET users 101`).
+- **`FIND <table> WHERE <field> = <val>`**: Filtered table search (`FIND users WHERE status = ACTIVE`).
+- **`INSERT INTO <table> <json>`**: Insert record (`INSERT INTO users {"id": 101, "name": "Satoshi"}`).
+- **`UPDATE <table> <id> SET <field> = <val>`**: Update record (`UPDATE users 101 SET status = INACTIVE`).
+- **`DELETE <table> <id>`**: Delete record (`DELETE users 101`).
+- **`INDEX <table> ON <field>`**: Create secondary B+ Tree index (`INDEX users ON email`).
+
+---
+
+## 3. Structured JSON Query Actions and Formats
 
 ### A. Create Foreign Key Constraint (`create_foreign_key`)
 Establishes a relational constraint linking a child table field to a parent table field.
