@@ -49,9 +49,27 @@ const FilterNode = () => (
   </div>
 );
 
+const OqsNode = () => (
+  <div className={nodeStyle}>
+    <Handle type="target" position={Position.Left} className="w-3 h-3 bg-green-400" />
+    <div className={headerStyle}>
+      <Database className="w-4 h-4 text-green-400" />
+      <span className="font-bold text-sm text-white">OQS Query</span>
+    </div>
+    <div className="text-xs text-onyx-100/70 space-y-2">
+      <div>
+        <label className="block mb-1">Query String:</label>
+        <input type="text" defaultValue="GET users 101" className="w-full bg-onyx-900/50 border border-onyx-600 rounded p-1 text-green-400 focus:outline-none focus:border-green-400" />
+      </div>
+    </div>
+    <Handle type="source" position={Position.Right} className="w-3 h-3 bg-green-400" />
+  </div>
+);
+
 const nodeTypes = {
   selectNode: SelectNode,
   filterNode: FilterNode,
+  oqsNode: OqsNode,
 };
 
 const initialNodes = [
@@ -85,6 +103,15 @@ const Sidebar = () => {
       >
         <Filter className="w-5 h-5 text-secondary" />
         <span className="font-bold text-sm">Filter</span>
+      </div>
+
+      <div 
+        className="glass-card p-3 flex items-center gap-3 cursor-grab hover:border-green-400/50 transition-colors" 
+        onDragStart={(event) => onDragStart(event, 'oqsNode')} 
+        draggable
+      >
+        <Database className="w-5 h-5 text-green-400" />
+        <span className="font-bold text-sm">OQS Query</span>
       </div>
     </aside>
   );
@@ -135,10 +162,14 @@ const Flow = ({ onRun }: VisualQueryBuilderProps) => {
 
   const executePipeline = () => {
     if (onRun) {
-      // Basic AST translation: just check for a select node for demo purposes
+      const hasOqs = nodes.some(n => n.type === 'oqsNode');
+      if (hasOqs) {
+        onRun(JSON.stringify({ oqs: "GET users 101" }, null, 2));
+        return;
+      }
       const hasSelect = nodes.some(n => n.type === 'selectNode');
       if (!hasSelect) {
-        onRun(JSON.stringify({ error: "Pipeline needs a Select Node" }));
+        onRun(JSON.stringify({ error: "Pipeline needs a Select Node or OQS Node" }));
         return;
       }
       onRun(JSON.stringify({ action: "select", table: "users" }, null, 2));

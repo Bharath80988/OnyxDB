@@ -26,6 +26,8 @@ public class BTreeManager {
     private static final byte TYPE_LEAF = 0;
     private static final byte TYPE_INTERNAL = 1;
 
+    private final BloomFilter bloomFilter = new BloomFilter();
+
     public BTreeManager(BufferPool bufferPool) throws IOException {
         this.bufferPool = bufferPool;
         if (bufferPool.getNumPages() == 0) {
@@ -33,6 +35,10 @@ public class BTreeManager {
             initLeafNode(rootPage);
             bufferPool.flushPage(rootPageId);
         }
+    }
+
+    public BloomFilter getBloomFilter() {
+        return bloomFilter;
     }
 
     private void initLeafNode(Page page) {
@@ -105,6 +111,7 @@ public class BTreeManager {
         // Increment record count
         leafPage.writeInt(1, numRecords + 1);
         leafPage.setDirty(true);
+        bloomFilter.add(id);
         log.debug("Inserted record id {} into page {}", id, leafPage.getPageId());
     }
 
@@ -194,6 +201,11 @@ public class BTreeManager {
     }
 
     public String search(int id) throws IOException {
+        if (bloomFilter.getElementCount() > 0 && !bloomFilter.mightContain(id)) {
+            log.debug("BloomFilter fast-skip for key id {}", id);
+            return null;
+        }
+
         int currentPageId = rootPageId;
         while (true) {
             Page page = bufferPool.getPage(currentPageId);
@@ -307,6 +319,8 @@ public class BTreeManager {
             int numRecords = page.readInt(1);
             for (int i = 0; i < numRecords; i++) {
                 int offset = HEADER_SIZE + (i * RECORD_SIZE);
+                int id = page.readInt(offset);
+                bloomFilter.add(id);
                 int len = page.readInt(offset + 4);
                 byte[] stringBytes = new byte[len];
                 System.arraycopy(page.getData(), offset + 8, stringBytes, 0, len);
