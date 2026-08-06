@@ -51,7 +51,7 @@ This document outlines the master architecture roadmap for **OnyxDB v4.0.0**, or
 ## 3. AI & Vector Engine Subsystem
 
 ### 10. Hybrid Search Engine
-- **Status:** In Progress
+- **Status:** Implemented (v4.0.0)
 - **Description:** Unified execution path combining keyword search, relational foreign key filtering, and vector similarity search in a single query.
 
 ### 11. SIMD Vector Acceleration
@@ -63,7 +63,7 @@ This document outlines the master architecture roadmap for **OnyxDB v4.0.0**, or
 ## 4. Networking Engine Subsystem
 
 ### 12. Onyx Wire Protocol (OWP)
-- **Status:** Planned (v4.0.0 Milestone 1)
+- **Status:** Implemented (v4.0.0)
 - **Description:** Binary wire protocol replacing raw JSON over TCP sockets for lower latency and smaller packet overhead.
 
 ### 13. Zero-Copy TCP Networking
@@ -83,15 +83,15 @@ This document outlines the master architecture roadmap for **OnyxDB v4.0.0**, or
 ## 5. Query Engine Subsystem
 
 ### 16. Onyx Query Language (OQL)
-- **Status:** Planned (v4.0.0 Milestone 1 - Next Step)
+- **Status:** Implemented (v3.0.0 - OQS / OQL syntax engine)
 - **Description:** Human-friendly, SQL-inspired declarative query syntax (e.g. `FIND users WHERE age > 20`).
 
 ### 17. Lexer, Parser, and AST Execution Planner
-- **Status:** Planned (v4.0.0 Milestone 1 - Next Step)
+- **Status:** Implemented (v3.0.0 - OQS AST Parser)
 - **Description:** Converts OQL text into Abstract Syntax Tree (AST) nodes and translates AST into `ExecutionEngine` execution steps.
 
 ### 18. `EXPLAIN` Query Profiler
-- **Status:** Planned (v4.0.0 Milestone 1 - Next Step)
+- **Status:** Implemented (v4.0.0)
 - **Description:** Outputs execution plan estimates, index selections, and cost evaluations prior to query execution.
 
 ---
@@ -99,8 +99,8 @@ This document outlines the master architecture roadmap for **OnyxDB v4.0.0**, or
 ## 6. Developer Experience & Distribution Subsystem
 
 ### 19. Interactive Onyx CLI
-- **Status:** Planned (v4.0.0 Milestone 1)
-- **Description:** Terminal REPL (`onyx`) featuring auto-completion, syntax highlighting, and query execution.
+- **Status:** Implemented (v4.0.0)
+- **Description:** Terminal REPL (`OnyxCli.java`) featuring auto-completion, syntax suggestions, execution timing, and query execution.
 
 ### 20. Multi-Language Client SDKs (Python & Node.js)
 - **Status:** Implemented (PyPI `onyxdb` & NPM `onyxdb`)

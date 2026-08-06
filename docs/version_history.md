@@ -6,6 +6,12 @@ This document tracks the complete chronological version history of **OnyxDB** fr
 
 ## Version Timeline
 
+### v4.0.0 — Onyx Wire Protocol, EXPLAIN Profiler, Hybrid Search & Interactive CLI
+- **Onyx Wire Protocol (OWP)**: 9-byte binary header socket protocol (`0x4F4E5958` "ONYX" magic bytes) over NIO TCP socket streams.
+- **`EXPLAIN` Query Profiler**: Cost-Based Query Optimizer (CBO) plan inspection detailing plan types (`POINT_LOOKUP`, `SECONDARY_INDEX_SCAN`, `FULL_TABLE_SCAN`) and I/O costs.
+- **Hybrid Search Engine**: Single query execution path combining HNSW KNN Cosine vector search with secondary index / relational metadata filtering (`hybrid_search`).
+- **Interactive Onyx CLI**: Terminal REPL interactive shell with command auto-completion suggestions, execution timing, and formatted table outputs (`OnyxCli.java`).
+
 ### v0.1.0 — Initial Engine Prototype
 - Storage Manager with 8KB disk page reads and writes using Java NIO.
 - In-memory LRU Buffer Pool caching.

@@ -17,8 +17,10 @@ This document summarizes the current status, active capabilities, upcoming featu
 - [x] **Multi-Table Dynamic Routing**: Automatic creation and routing for table storage files (`<table_name>.db`).
 - [x] **LRU Buffer Pool Memory Cache**: Disk page caching with LRU page eviction policy.
 - [x] **Embedded Executable Uber-JAR**: Bundled React frontend static assets inside a standalone Java executable.
-- [x] **Consolidated Documentation Suite**: Organized documentation directory structure ([`docs/`](./)).
-- [x] **Onyx Query Syntax (OQS)**: Lightweight human-readable string query language (`GET`, `FIND`, `INSERT`, `UPDATE`, `DELETE`, `INDEX`).
+- [x] **Onyx Wire Protocol (OWP)**: Binary socket framing protocol (`0x4F4E5958` header, 9-byte binary header) over NIO TCP sockets (`OnyxWireProtocol.java`).
+- [x] **`EXPLAIN` Query Profiler**: Cost-Based Query Optimizer (CBO) plan inspection for OQS queries (`EXPLAIN FIND ...`).
+- [x] **Hybrid Search Engine**: Single query execution path combining HNSW KNN vector search with secondary index / relational metadata filtering (`executeHybridSearch`).
+- [x] **Interactive Onyx CLI**: Terminal REPL shell with command suggestions and query execution (`OnyxCli.java`).
 - [x] **High-Level Client SDKs**: Built-in helper wrappers in Python (`onyxdb.py`) and Node.js (`OnyxClient`).
 - [x] **Multi-Language Package Distribution**: Published zero-dependency Python package (`pip install onyxdb`) and Node.js package (`npx onyxdb`).
 

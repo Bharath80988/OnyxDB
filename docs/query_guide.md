@@ -35,10 +35,28 @@ OnyxDB supports string queries via the `"oqs"` key:
 ### Supported OQS Commands:
 - **`GET <table> <id>`**: Point lookup by record primary key (`GET users 101`).
 - **`FIND <table> WHERE <field> = <val>`**: Filtered table search (`FIND users WHERE status = ACTIVE`).
+- **`EXPLAIN <query>`**: Output Cost-Based Optimizer (CBO) plan and I/O estimate (`EXPLAIN FIND users WHERE status = ACTIVE`).
 - **`INSERT INTO <table> <json>`**: Insert record (`INSERT INTO users {"id": 101, "name": "Satoshi"}`).
 - **`UPDATE <table> <id> SET <field> = <val>`**: Update record (`UPDATE users 101 SET status = INACTIVE`).
 - **`DELETE <table> <id>`**: Delete record (`DELETE users 101`).
 - **`INDEX <table> ON <field>`**: Create secondary B+ Tree index (`INDEX users ON email`).
+
+---
+
+## 2.1 Onyx Wire Protocol (OWP) Binary Framing Protocol
+
+On port `8081`, TCP sockets support zero-copy binary framing with a 9-byte header:
+
+```
++-------------------+---------------+----------------------+------------------+
+| Magic (4 Bytes)   | Type (1 Byte) | Length (4 Bytes BE)  | Payload (Bytes)  |
+| 0x4F4E5958 "ONYX" | 0x01 / 0x03   | N                    | UTF-8 Payload    |
++-------------------+---------------+----------------------+------------------+
+```
+
+- **`0x01` (MSG_QUERY)**: Standard OQS or JSON query payload.
+- **`0x02` (MSG_RESPONSE)**: Engine response payload.
+- **`0x03` (MSG_EXPLAIN)**: Cost profiler execution plan output.
 
 ---
 

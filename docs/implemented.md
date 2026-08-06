@@ -16,14 +16,18 @@ Below is a comprehensive list of all implemented functionalities in OnyxDB that 
 ## Vector Search (AI)
 - **HNSW Vector Storage**: Native AI embedding storage designed as a foundation for Navigable Small World graphs.
 - **Exact KNN Search**: Cosine Similarity distance calculations executed in native Java to return Top-K nearest neighbors instantly.
+- **Hybrid Search Engine**: Single execution path combining vector similarity search with relational field filters (`executeHybridSearch`).
 
 ## API & Networking
-- **Round-Robin Multi-Reactor TCP Server**: High-throughput non-blocking NIO TCP socket server on port `8081` with Round-Robin worker thread load balancing (`RoundRobinWorkerGroup.java`).
+- **Onyx Wire Protocol (OWP)**: Compact 9-byte binary header socket protocol (`0x4F4E5958` header, 1-byte msgType, 4-byte length) for zero-copy TCP socket communication (`OnyxWireProtocol.java`).
+- **Round-Robin Multi-Reactor TCP Server**: High-throughput non-blocking NIO TCP socket server on port `8081` supporting dual OWP binary and JSON text stream framing (`RoundRobinWorkerGroup.java`).
 - **Role-Based Access Control (RBAC)**: Secure endpoints differentiating `ADMIN` (read/write/update/delete/index) and `READ_ONLY` roles.
 - **Native JSON over HTTP & TCP**: Dual-protocol payload routing over HTTP REST and Native TCP sockets.
 - **Multi-Table Dynamic Routing**: The engine intercepts the `"table"` field in JSON payloads and dynamically routes queries to `<table_name>.db`.
 
-## Operations
+## Operations & Execution
+- **`EXPLAIN` Query Profiling**: Evaluates CBO execution plans (`POINT_LOOKUP`, `SECONDARY_INDEX_SCAN`, `FULL_TABLE_SCAN`) and estimates I/O costs.
+- **Interactive Onyx CLI**: Terminal REPL shell featuring auto-completion, execution benchmarking, and result formatting (`OnyxCli.java`).
 - **Insert / Upsert**: Automatically handles duplicate keys by overwriting existing records.
 - **Update**: In-place payload modification in B+ Tree leaf pages with $O(\log N)$ binary search lookup.
 - **Delete**: Record removal with memory slot shifting (`System.arraycopy`) and $O(\log N)$ binary search lookup.
