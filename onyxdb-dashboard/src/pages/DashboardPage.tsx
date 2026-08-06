@@ -12,10 +12,18 @@ const DashboardPage: React.FC = () => {
     setLoading(true);
     setResult('Executing...');
     try {
-      const response = await fetch('http://localhost:8080/query', {
+      let bodyData = queryPayload.trim();
+      if (!bodyData.startsWith('{') && !bodyData.startsWith('[')) {
+        bodyData = JSON.stringify({ oqs: bodyData });
+      }
+
+      const response = await fetch('http://localhost:8080/api/query', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: queryPayload
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer admin-secret-key'
+        },
+        body: bodyData
       });
       const data = await response.json();
       setResult(JSON.stringify(data, null, 2));
