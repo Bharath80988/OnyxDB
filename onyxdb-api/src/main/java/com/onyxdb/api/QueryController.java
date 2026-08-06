@@ -8,9 +8,27 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * REST API controller for executing OnyxDB queries and fetching server metrics.
+ *
+ * <p>Endpoints:
+ * <ul>
+ *   <li>{@code POST /api/query} — Execute a JSON or OQS query (requires Authorization header).</li>
+ *   <li>{@code GET  /api/stats} — Health check and server uptime.</li>
+ *   <li>{@code GET  /api/metrics} — Live system telemetry (table count, JVM memory, indexes).</li>
+ * </ul>
+ * </p>
+ *
+ * <p>RBAC:
+ * <ul>
+ *   <li>Admin token: full read/write/admin access.</li>
+ *   <li>Read-only token: SELECT and read operations only.</li>
+ * </ul>
+ * </p>
+ */
 @RestController
 @RequestMapping("/api")
-@CrossOrigin(origins = "*") // Allow dashboard to connect
+@CrossOrigin(origins = "*") // Allow dashboard and CLI to connect
 public class QueryController {
 
     private final QueryService queryService;
@@ -59,11 +77,24 @@ public class QueryController {
         }
     }
 
+    /**
+     * Health check endpoint. Returns server status and current uptime timestamp.
+     */
     @GetMapping("/stats")
     public Map<String, Object> getStats() {
         Map<String, Object> stats = new HashMap<>();
         stats.put("status", "running");
-        stats.put("uptime", System.currentTimeMillis());
+        stats.put("version", "4.0.0");
+        stats.put("uptime_epoch_ms", System.currentTimeMillis());
         return stats;
+    }
+
+    /**
+     * Live metrics endpoint. Returns JVM memory stats, table count, and index metadata.
+     * Delegates to {@link com.onyxdb.core.execution.ExecutionEngine#getSystemMetrics()}.
+     */
+    @GetMapping("/metrics")
+    public Map<String, Object> getMetrics() {
+        return queryService.getSystemMetrics();
     }
 }

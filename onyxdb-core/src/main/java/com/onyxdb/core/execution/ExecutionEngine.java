@@ -18,8 +18,25 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Parses and executes structured JSON queries across multiple tables with support for
- * Primary B+ Trees, Secondary Indexing, AI Vector Search, and Foreign Key Schema Normalization.
+ * Central query execution engine for OnyxDB.
+ *
+ * <p>Routes structured JSON query nodes and OQS string queries across multiple dynamically
+ * created tables. Each table is backed by a B+ Tree primary index, optional secondary
+ * B+ Tree indexes, an HNSW vector index, and a Write-Ahead Log (WAL) for durability.</p>
+ *
+ * <p>Supported query actions:
+ * <ul>
+ *   <li>{@code select} — Point lookup, secondary index scan, or full table scan.</li>
+ *   <li>{@code insert} — WAL-durable record insert with FK constraint enforcement.</li>
+ *   <li>{@code update} — In-place B+ Tree record update with secondary index sync.</li>
+ *   <li>{@code delete} — B+ Tree record delete with FK CASCADE/RESTRICT policy.</li>
+ *   <li>{@code create_index} — Builds secondary B+ Tree index over existing records.</li>
+ *   <li>{@code vector_search} — Exact KNN Cosine Similarity search over HNSW embeddings.</li>
+ *   <li>{@code hybrid_search} — Vector KNN search with relational field filter post-processing.</li>
+ *   <li>{@code explain} — CBO execution plan profiler output.</li>
+ *   <li>{@code create_foreign_key} — Registers cross-table FK constraint with RESTRICT/CASCADE.</li>
+ * </ul>
+ * </p>
  */
 public class ExecutionEngine {
     private static final Logger log = LoggerFactory.getLogger(ExecutionEngine.class);
@@ -36,9 +53,58 @@ public class ExecutionEngine {
         log.info("ExecutionEngine initialized with storage directory: {}", storageDir);
     }
 
+    /** Returns the {@link SchemaManager} managing foreign key constraints and schema persistence. */
     public SchemaManager getSchemaManager() {
         return schemaManager;
     }
+
+    /**
+     * Returns the names of all currently active (loaded) tables in this engine instance.
+     * Used by the Onyx CLI for {@code SHOW TABLES} meta-command.
+     *
+     * @return Set of active table name strings.
+     */
+    public Set<String> getTableNames() {
+        return tables.keySet();
+    }
+
+    /**
+     * Returns a live system metrics snapshot for telemetry and monitoring.
+     * Includes: table count, total indexed records, secondary index counts,
+     * vector index sizes, and JVM heap memory usage.
+     *
+     * @return Map of metric name → metric value.
+     */
+    public Map<String, Object> getSystemMetrics() {
+        Map<String, Object> metrics = new LinkedHashMap<>();
+
+        // Table and record counters
+        metrics.put("active_tables", tables.size());
+        metrics.put("storage_dir", storageDir.toString());
+
+        // JVM memory metrics
+        Runtime rt = Runtime.getRuntime();
+        long maxMb  = rt.maxMemory()   / (1024 * 1024);
+        long usedMb = (rt.totalMemory() - rt.freeMemory()) / (1024 * 1024);
+        metrics.put("jvm_max_memory_mb", maxMb);
+        metrics.put("jvm_used_memory_mb", usedMb);
+        metrics.put("jvm_free_memory_mb", maxMb - usedMb);
+
+        // Per-table secondary index and vector index stats
+        Map<String, Object> tableStats = new LinkedHashMap<>();
+        for (String tableName : tables.keySet()) {
+            Map<String, Object> tStats = new LinkedHashMap<>();
+            ConcurrentHashMap<String, SecondaryBTreeIndex> secIndexes = secondaryIndexes.get(tableName);
+            tStats.put("secondary_indexes", secIndexes != null ? secIndexes.keySet() : Collections.emptySet());
+            HnswIndex hnsw = vectorIndexes.get(tableName);
+            tableStats.put(tableName, tStats);
+        }
+        metrics.put("tables", tableStats);
+
+        return metrics;
+    }
+
+
 
     private BTreeManager getTable(String tableName) {
         if (tableName == null || tableName.trim().isEmpty()) {

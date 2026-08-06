@@ -51,11 +51,22 @@ class OnyxDB:
         return self._post({"action": "vector_search", "table": table, "vector": vector, "k": k})
 
     def oqs(self, query_string):
-        """Execute string query in Onyx Query Syntax (e.g. 'GET users 101')."""
+        """Execute a string query in Onyx Query Syntax (e.g. 'GET users 101')."""
         return self._post({"oqs": query_string})
 
+    def explain(self, query_string):
+        """Return the Cost-Based Optimizer (CBO) execution plan for an OQS query."""
+        return self._post({"oqs": f"EXPLAIN {query_string}"})
+
+    def hybrid_search(self, table, vector, where=None, k=5):
+        """KNN Cosine vector search combined with a relational field filter."""
+        payload = {"action": "hybrid_search", "table": table, "vector": vector, "k": k}
+        if where:
+            payload["where"] = where
+        return self._post(payload)
+
     def query(self, raw_json):
-        """Execute raw JSON query dictionary."""
+        """Execute a raw JSON query dictionary."""
         return self._post(raw_json)
 
 

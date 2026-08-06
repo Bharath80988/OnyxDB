@@ -1,8 +1,8 @@
-# OnyxDB (v0.2.0)
+# OnyxDB (v4.0.0)
 
 > **The Multi-Table Omni-Channel Database built on B+ Trees.**
 
-OnyxDB is a high-performance, local-first database engine featuring B+ Tree page indexing, zero-copy OS virtual memory mapping (`mmap`), non-blocking NIO socket channels, and native AI KNN vector search. It includes an embedded database visualizer (**Onyx Studio**) served directly from its standalone binary engine.
+OnyxDB is a high-performance, local-first database engine featuring B+ Tree page indexing, zero-copy OS virtual memory mapping (`mmap`), non-blocking NIO socket channels, native AI KNN vector search, hybrid vector+relational search, and an interactive **Onyx Terminal CLI** REPL. It includes an embedded database visualizer (**Onyx Studio**) served directly from its standalone binary engine.
 
 ---
 
@@ -113,6 +113,12 @@ active_users = db.find("users", {"role": "ADMIN"})
 # Run Onyx Query Syntax (OQS) string query
 res = db.oqs("FIND users WHERE role = ADMIN")
 
+# EXPLAIN — show CBO execution plan
+plan = db.explain("FIND users WHERE role = ADMIN")
+
+# Hybrid Search — KNN vector similarity + relational filter
+results = db.hybrid_search("docs", [0.1, 0.9, 0.3], where={"status": "ACTIVE"}, k=10)
+
 # Update record
 db.update("users", 101, {"status": "INACTIVE"})
 
@@ -137,7 +143,14 @@ async function main() {
 
     // Execute Onyx Query Syntax
     const activeUsers = await db.oqs('FIND users WHERE role = ADMIN');
-    console.log(activeUsers);
+
+    // EXPLAIN — get CBO execution plan
+    const plan = await db.explain('FIND users WHERE role = ADMIN');
+    console.log(plan);
+
+    // Hybrid Search — KNN vector similarity + relational filter
+    const results = await db.hybridSearch('docs', [0.1, 0.9, 0.3], { status: 'ACTIVE' }, 10);
+    console.log(results);
 
     // Delete record
     await db.delete('users', 101);
@@ -207,10 +220,27 @@ OnyxDB supports low-overhead binary framing over native TCP sockets on port `808
 - **Header Length**: 9 Bytes (`[4B Magic][1B MsgType][4B Payload Length]`)
 - **Message Types**: `0x01` (Query), `0x02` (Response), `0x03` (Explain)
 
-##### 6. Interactive Onyx CLI REPL
-Launch the interactive terminal shell with auto-completion and live query execution:
+##### 6. Interactive Onyx CLI REPL (SQL-like Terminal)
+Launch the interactive terminal shell with ASCII table rendering, ANSI color, auto-completion, and live query execution:
 ```bash
-java -cp onyxdb-api-0.2.0.jar com.onyxdb.api.cli.OnyxCli ./onyx_data
+java -cp onyxdb-api-*.jar com.onyxdb.api.cli.OnyxCli ./onyx_data
+```
+
+Once inside the REPL:
+```sql
+onyx> SHOW TABLES
+onyx> DESCRIBE users
+onyx> GET users 101
+onyx> FIND users WHERE role = ADMIN
+onyx> EXPLAIN FIND users WHERE role = ADMIN
+onyx> SHOW METRICS
+onyx> HELP
+onyx> EXIT
+```
+
+##### 7. Live System Metrics Endpoint
+```bash
+curl http://localhost:8080/api/metrics
 ```
 
 ---
@@ -243,4 +273,6 @@ Additional specifications and guides are located in [`docs/`](./docs):
 - [Master Architecture Roadmap](docs/roadmap.md)
 - [System Status & Capabilities](docs/status.md)
 - [Master Query Guide](docs/query_guide.md)
+- [OQS Protocol Reference](docs/protocol.md)
+- [Version History](docs/version_history.md)
 - [Product Architecture Pitch & Database Comparison](docs/onyxdb_architecture_pitch.md)

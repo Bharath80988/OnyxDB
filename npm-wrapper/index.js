@@ -132,7 +132,25 @@ class OnyxClient {
     }
 
     oqs(queryString) {
+        /** Execute a string query in Onyx Query Syntax (e.g. 'GET users 101'). */
         return this._request({ oqs: queryString });
+    }
+
+    explain(queryString) {
+        /** Return the Cost-Based Optimizer (CBO) execution plan for an OQS query string. */
+        return this._request({ oqs: `EXPLAIN ${queryString}` });
+    }
+
+    hybridSearch(table, vector, where = null, k = 5) {
+        /** KNN Cosine Similarity vector search combined with a relational field filter.
+         *  @param {string}   table  - Target table name.
+         *  @param {number[]} vector - Float array embedding.
+         *  @param {object}   where  - Optional field filter object applied after vector ranking.
+         *  @param {number}   k      - Number of nearest neighbors to return.
+         */
+        const payload = { action: 'hybrid_search', table, vector, k };
+        if (where) payload.where = where;
+        return this._request(payload);
     }
 }
 

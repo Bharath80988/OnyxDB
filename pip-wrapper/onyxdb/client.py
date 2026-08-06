@@ -1,3 +1,5 @@
+"""OnyxDB Python Client SDK — high-level helper methods for OnyxDB REST API queries."""
+
 import requests
 import json
 
@@ -50,9 +52,34 @@ class OnyxDB:
         return self._post({"action": "vector_search", "table": table, "vector": vector, "k": k})
 
     def oqs(self, query_string):
-        """Execute string query in Onyx Query Syntax (e.g. 'GET users 101')."""
+        """Execute a string query in Onyx Query Syntax (e.g. 'GET users 101')."""
         return self._post({"oqs": query_string})
 
+    def explain(self, query_string):
+        """Return Cost-Based Optimizer (CBO) execution plan for the given OQS query.
+
+        Example:
+            db.explain("FIND users WHERE status = ACTIVE")
+        """
+        return self._post({"oqs": f"EXPLAIN {query_string}"})
+
+    def hybrid_search(self, table, vector, where=None, k=5):
+        """Execute Hybrid Search: KNN Cosine vector similarity combined with relational field filters.
+
+        Args:
+            table:  Target table name.
+            vector: Float list query embedding.
+            where:  Optional dict of field filters applied after vector ranking.
+            k:      Number of nearest neighbors to return before filtering.
+
+        Example:
+            db.hybrid_search("docs", [0.1, 0.9, 0.3], where={"status": "ACTIVE"}, k=10)
+        """
+        payload = {"action": "hybrid_search", "table": table, "vector": vector, "k": k}
+        if where:
+            payload["where"] = where
+        return self._post(payload)
+
     def query(self, raw_json):
-        """Execute raw JSON query dictionary."""
+        """Execute a raw JSON query dictionary against the REST API."""
         return self._post(raw_json)
