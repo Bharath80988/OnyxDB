@@ -119,6 +119,29 @@ public class RoundRobinWorkerGroup {
                 }
 
                 buffer.flip();
+                
+                // Attempt to decode Onyx Wire Protocol (OWP) binary frame
+                com.onyxdb.core.execution.OnyxWireProtocol.Frame owpFrame = com.onyxdb.core.execution.OnyxWireProtocol.decode(buffer);
+                if (owpFrame != null) {
+                    log.debug("Received OWP binary frame type 0x{}", Integer.toHexString(owpFrame.getMsgType()));
+                    String payload = owpFrame.getPayload();
+                    List<String> results;
+                    if (payload.trim().startsWith("{")) {
+                        Map<String, Object> queryNode = mapper.readValue(payload, Map.class);
+                        results = executionEngine.execute(queryNode);
+                    } else {
+                        results = executionEngine.execute(payload);
+                    }
+                    String responsePayload = mapper.writeValueAsString(results);
+                    ByteBuffer writeBuf = com.onyxdb.core.execution.OnyxWireProtocol.encode(com.onyxdb.core.execution.OnyxWireProtocol.MSG_RESPONSE, responsePayload);
+                    while (writeBuf.hasRemaining()) {
+                        channel.write(writeBuf);
+                    }
+                    return;
+                }
+
+                // Fallback to legacy UTF-8 text framing
+                buffer.rewind();
                 byte[] bytes = new byte[buffer.remaining()];
                 buffer.get(bytes);
                 String jsonQueryStr = new String(bytes, StandardCharsets.UTF_8).trim();
@@ -126,8 +149,13 @@ public class RoundRobinWorkerGroup {
                 if (jsonQueryStr.isEmpty()) return;
 
                 log.debug("Received TCP socket query: {}", jsonQueryStr);
-                Map<String, Object> queryNode = mapper.readValue(jsonQueryStr, Map.class);
-                List<String> results = executionEngine.execute(queryNode);
+                List<String> results;
+                if (jsonQueryStr.startsWith("{")) {
+                    Map<String, Object> queryNode = mapper.readValue(jsonQueryStr, Map.class);
+                    results = executionEngine.execute(queryNode);
+                } else {
+                    results = executionEngine.execute(jsonQueryStr);
+                }
 
                 String jsonResponse = mapper.writeValueAsString(results) + "\n";
                 ByteBuffer writeBuf = ByteBuffer.wrap(jsonResponse.getBytes(StandardCharsets.UTF_8));

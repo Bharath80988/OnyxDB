@@ -182,19 +182,35 @@ curl -X POST http://localhost:8080/api/query \
   }'
 ```
 
-##### 3. Foreign Key Constraint Creation
+##### 3. EXPLAIN Query Profiling
+```sql
+EXPLAIN FIND users WHERE status = ACTIVE
+```
+
+##### 4. Hybrid Search Engine (KNN Vector Similarity + Relational Filter)
 ```bash
 curl -X POST http://localhost:8080/api/query \
-  -H "Authorization: Bearer admin-secret-key" \
+  -H "Authorization: Bearer readonly-secret-key" \
   -H "Content-Type: application/json" \
   -d '{
-    "action": "create_foreign_key",
-    "table": "orders",
-    "field": "user_id",
-    "parent_table": "users",
-    "parent_field": "id",
-    "on_delete": "CASCADE"
+    "action": "hybrid_search",
+    "table": "documents",
+    "vector": [0.15, 0.82, -0.41, 0.09],
+    "k": 3,
+    "where": {"status": "ACTIVE"}
   }'
+```
+
+##### 5. Onyx Wire Protocol (OWP) Binary Socket Stream (Port 8081)
+OnyxDB supports low-overhead binary framing over native TCP sockets on port `8081`:
+- **Magic Header**: `0x4F4E5958` ("ONYX")
+- **Header Length**: 9 Bytes (`[4B Magic][1B MsgType][4B Payload Length]`)
+- **Message Types**: `0x01` (Query), `0x02` (Response), `0x03` (Explain)
+
+##### 6. Interactive Onyx CLI REPL
+Launch the interactive terminal shell with auto-completion and live query execution:
+```bash
+java -cp onyxdb-api-0.2.0.jar com.onyxdb.api.cli.OnyxCli ./onyx_data
 ```
 
 ---
@@ -213,8 +229,9 @@ When OnyxDB is running, navigate to **`http://localhost:8080`** in a web browser
 ## Engine Architecture Highlights
 
 - **OS Virtual Memory Mapping (`MmapStorageManager.java`)**: Maps database files directly to OS kernel virtual memory pages via `MappedByteBuffer`, eliminating JVM garbage collection pauses.
-- **Round-Robin Multi-Reactor (`RoundRobinWorkerGroup.java`)**: Non-blocking Java NIO socket server distributing TCP channels across worker threads.
+- **Round-Robin Multi-Reactor (`RoundRobinWorkerGroup.java`)**: Non-blocking Java NIO socket server distributing TCP channels across worker threads with dual-mode OWP binary and JSON framing.
 - **Durability & Crash Recovery (`WriteAheadLog.java`)**: Append-only WAL transaction logging guaranteeing ACID compliance.
+- **Onyx Wire Protocol (`OnyxWireProtocol.java`)**: High-performance 9-byte binary header socket protocol.
 
 ---
 

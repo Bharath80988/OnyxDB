@@ -61,4 +61,15 @@ public class OqsParserTest {
         List<String> deleteResult = engine.execute("DELETE users 101");
         assertThat(deleteResult).contains("Deleted 1 row.");
     }
+
+    @Test
+    void testExplainQuery() throws Exception {
+        Map<String, Object> node = engine.parseOqsToQueryNode("EXPLAIN FIND users WHERE status = ACTIVE");
+        assertThat(node.get("action")).isEqualTo("explain");
+        assertThat(node.get("table")).isEqualTo("users");
+
+        List<String> explainResult = engine.execute("EXPLAIN FIND users WHERE status = ACTIVE");
+        assertThat(explainResult).hasSize(1);
+        assertThat(explainResult.get(0)).startsWith("EXPLAIN ExecutionPlan{");
+    }
 }

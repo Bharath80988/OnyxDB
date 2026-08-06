@@ -144,6 +144,10 @@ public class ExecutionEngine {
                 return executeCreateIndex(table, db, queryNode);
             case "vector_search":
                 return executeVectorSearch(table, db, queryNode);
+            case "hybrid_search":
+                return executeHybridSearch(table, db, queryNode);
+            case "explain":
+                return executeExplain(table, db, queryNode);
             case "create_foreign_key":
             case "add_foreign_key":
                 return executeCreateForeignKey(table, queryNode);
@@ -537,6 +541,52 @@ public class ExecutionEngine {
         return results;
     }
 
+    private List<String> executeHybridSearch(String tableName, BTreeManager db, Map<String, Object> queryNode) throws IOException {
+        List<String> vectorResults = executeVectorSearch(tableName, db, queryNode);
+        if (queryNode.containsKey("where") && queryNode.get("where") instanceof Map) {
+            Map<String, Object> whereMap = (Map<String, Object>) queryNode.get("where");
+            List<String> filtered = new ArrayList<>();
+            for (String record : vectorResults) {
+                boolean matches = true;
+                for (Map.Entry<String, Object> condition : whereMap.entrySet()) {
+                    String fieldVal = extractFieldFromRecord(record, condition.getKey());
+                    String expectedVal = condition.getValue() != null ? condition.getValue().toString() : null;
+                    if (fieldVal == null || !fieldVal.equalsIgnoreCase(expectedVal)) {
+                        matches = false;
+                        break;
+                    }
+                }
+                if (matches) {
+                    filtered.add(record);
+                }
+            }
+            log.info("Hybrid search returned {} results after relational filter", filtered.size());
+            return filtered;
+        }
+        return vectorResults;
+    }
+
+    private List<String> executeExplain(String tableName, BTreeManager db, Map<String, Object> queryNode) throws IOException {
+        TableStats stats = new TableStats(tableName);
+        stats.setTotalRows(db.scanAll().size());
+        boolean hasPrimaryKey = queryNode.containsKey("id");
+        ConcurrentHashMap<String, SecondaryBTreeIndex> tableIndexes = secondaryIndexes.get(tableName);
+        String indexField = null;
+        if (queryNode.containsKey("where") && queryNode.get("where") instanceof Map) {
+            Map<String, Object> whereMap = (Map<String, Object>) queryNode.get("where");
+            for (String key : whereMap.keySet()) {
+                if (tableIndexes != null && tableIndexes.containsKey(key)) {
+                    indexField = key;
+                    break;
+                }
+            }
+        }
+        boolean hasSecondaryIndex = indexField != null;
+        QueryOptimizer optimizer = new QueryOptimizer();
+        QueryOptimizer.ExecutionPlan plan = optimizer.chooseBestPlan(stats, hasPrimaryKey, hasSecondaryIndex, indexField);
+        return Collections.singletonList("EXPLAIN " + plan.toString());
+    }
+
     // Helper functions for record string parsing
     private int extractIdFromRecord(String record) {
         if (record == null) return -1;
@@ -611,6 +661,14 @@ public class ExecutionEngine {
         }
 
         String q = query.trim();
+        if (q.toUpperCase().startsWith("EXPLAIN ")) {
+            String innerQuery = q.substring(8).trim();
+            Map<String, Object> innerNode = parseOqsToQueryNode(innerQuery);
+            Map<String, Object> explainNode = new HashMap<>(innerNode);
+            explainNode.put("action", "explain");
+            return explainNode;
+        }
+
         Map<String, Object> node = new HashMap<>();
 
         // 1. GET users 101  or  GET users:101
