@@ -1,5 +1,6 @@
 package com.onyxdb.api;
 
+import com.onyxdb.api.security.JwtTokenProvider;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -33,6 +34,8 @@ public class QueryController {
 
     private final QueryService queryService;
     
+    private final JwtTokenProvider jwtTokenProvider;
+    
     // RBAC mapping (configurable via .env or application.properties)
     @org.springframework.beans.factory.annotation.Value("${ADMIN_TOKEN:Bearer admin-secret-key}")
     private String adminToken;
@@ -40,8 +43,9 @@ public class QueryController {
     @org.springframework.beans.factory.annotation.Value("${READ_ONLY_TOKEN:Bearer readonly-secret-key}")
     private String readOnlyToken;
 
-    public QueryController(QueryService queryService) {
+    public QueryController(QueryService queryService, JwtTokenProvider jwtTokenProvider) {
         this.queryService = queryService;
+        this.jwtTokenProvider = jwtTokenProvider;
     }
 
     @PostMapping("/query")
@@ -51,15 +55,32 @@ public class QueryController {
             
         Map<String, Object> response = new HashMap<>();
         
+        String userRole = null;
+
+        // 1. Check legacy static tokens for backward compatibility
+        if (authHeader != null) {
+            if (authHeader.equals(adminToken)) {
+                userRole = "ADMIN";
+            } else if (authHeader.equals(readOnlyToken)) {
+                userRole = "READ_ONLY";
+            } else {
+                // 2. Validate JWT token
+                Map<String, Object> claims = jwtTokenProvider.validateAndExtractClaims(authHeader);
+                if (claims != null && claims.containsKey("role")) {
+                    userRole = (String) claims.get("role");
+                }
+            }
+        }
+
         // RBAC Enforcement
-        if (authHeader == null || (!authHeader.equals(adminToken) && !authHeader.equals(readOnlyToken))) {
+        if (userRole == null) {
             response.put("status", "error");
-            response.put("message", "Unauthorized: Missing or invalid Authorization header");
+            response.put("message", "Unauthorized: Missing, expired, or invalid Authorization header");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         }
 
         String action = (String) query.get("action");
-        if (action != null && (action.equalsIgnoreCase("insert") || action.equalsIgnoreCase("update") || action.equalsIgnoreCase("delete") || action.equalsIgnoreCase("create_index")) && authHeader.equals(readOnlyToken)) {
+        if (action != null && (action.equalsIgnoreCase("insert") || action.equalsIgnoreCase("update") || action.equalsIgnoreCase("delete") || action.equalsIgnoreCase("create_index")) && "READ_ONLY".equals(userRole)) {
             response.put("status", "error");
             response.put("message", "Forbidden: READ_ONLY role cannot perform mutative, destructive, or administrative operations");
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);

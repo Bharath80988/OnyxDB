@@ -17,11 +17,14 @@ const DashboardPage: React.FC = () => {
         bodyData = JSON.stringify({ oqs: bodyData });
       }
 
-      const response = await fetch('http://localhost:8080/api/query', {
+      const token = sessionStorage.getItem('onyx_jwt_token') || 'admin-secret-key';
+      const authHeader = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+
+      const response = await fetch('/api/query', {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer admin-secret-key'
+          'Authorization': authHeader
         },
         body: bodyData
       });

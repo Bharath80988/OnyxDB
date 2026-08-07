@@ -7,6 +7,7 @@ import LandingPage from './pages/LandingPage';
 import DocsPage from './pages/DocsPage';
 import DashboardPage from './pages/DashboardPage';
 import StatusPage from './pages/StatusPage';
+import LoginPage from './pages/LoginPage';
 
 function App() {
   useEffect(() => {
@@ -30,6 +31,7 @@ function App() {
             <Route path="/docs" element={<DocsPage />} />
             <Route path="/app" element={<DashboardPage />} />
             <Route path="/status" element={<StatusPage />} />
+            <Route path="/login" element={<LoginPage />} />
           </Routes>
         </div>
         <Footer />

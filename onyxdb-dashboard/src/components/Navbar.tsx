@@ -1,17 +1,33 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Database, Coffee, BookOpen, LayoutDashboard, Moon, Sun } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Database, Coffee, BookOpen, LayoutDashboard, Moon, Sun, LogIn, LogOut, ShieldCheck } from 'lucide-react';
 
 const Navbar: React.FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [isDark, setIsDark] = useState(true); // Default dark
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const [username, setUsername] = useState<string | null>(null);
 
   useEffect(() => {
     const storedTheme = localStorage.getItem('theme');
     const initDark = storedTheme ? storedTheme === 'dark' : true;
     setIsDark(initDark);
     applyTheme(initDark);
-  }, []);
+
+    // Read session auth
+    setUserRole(sessionStorage.getItem('onyx_user_role'));
+    setUsername(sessionStorage.getItem('onyx_username'));
+  }, [location.pathname]);
+
+  const handleLogout = () => {
+    sessionStorage.removeItem('onyx_jwt_token');
+    sessionStorage.removeItem('onyx_user_role');
+    sessionStorage.removeItem('onyx_username');
+    setUserRole(null);
+    setUsername(null);
+    navigate('/login');
+  };
 
   const toggleTheme = () => {
     const newDark = !isDark;
@@ -47,7 +63,7 @@ const Navbar: React.FC = () => {
             </Link>
           </div>
           
-          <div className="hidden md:flex items-center space-x-8 font-sans font-medium">
+          <div className="hidden md:flex items-center space-x-6 font-sans font-medium">
             <Link to="/docs" className={`flex items-center gap-2 transition-colors ${isActive('/docs')}`}>
               <BookOpen className="w-4 h-4" />
               Docs
@@ -60,7 +76,33 @@ const Navbar: React.FC = () => {
               <Database className="w-4 h-4" />
               Status
             </Link>
-            
+
+            {/* Auth Session Status & Actions */}
+            {userRole ? (
+              <div className="flex items-center space-x-3 bg-onyx-800/40 px-3 py-1.5 rounded-full border border-onyx-700/60">
+                <div className="flex items-center space-x-1.5 text-xs">
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                  <span className="font-semibold text-emerald-400">{username}</span>
+                  <span className="text-gray-400">({userRole})</span>
+                </div>
+                <button
+                  onClick={handleLogout}
+                  title="Logout"
+                  className="p-1 text-gray-400 hover:text-red-400 transition-colors"
+                >
+                  <LogOut className="w-4 h-4" />
+                </button>
+              </div>
+            ) : (
+              <Link
+                to="/login"
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 rounded-full transition-colors text-sm font-semibold"
+              >
+                <LogIn className="w-4 h-4" />
+                Login
+              </Link>
+            )}
+
             {/* Simple Theme Toggle */}
             <button 
               onClick={toggleTheme}
