@@ -37,10 +37,10 @@ public class QueryController {
     private final JwtTokenProvider jwtTokenProvider;
     
     // RBAC mapping (configurable via .env or application.properties)
-    @org.springframework.beans.factory.annotation.Value("${ADMIN_TOKEN:Bearer admin-secret-key}")
+    @org.springframework.beans.factory.annotation.Value("${ADMIN_TOKEN:}")
     private String adminToken;
     
-    @org.springframework.beans.factory.annotation.Value("${READ_ONLY_TOKEN:Bearer readonly-secret-key}")
+    @org.springframework.beans.factory.annotation.Value("${READ_ONLY_TOKEN:}")
     private String readOnlyToken;
 
     public QueryController(QueryService queryService, JwtTokenProvider jwtTokenProvider) {
@@ -57,11 +57,11 @@ public class QueryController {
         
         String userRole = null;
 
-        // 1. Check legacy static tokens for backward compatibility
-        if (authHeader != null) {
-            if (authHeader.equals(adminToken)) {
+        // 1. Check configured tokens or JWT
+        if (authHeader != null && !authHeader.isBlank()) {
+            if (adminToken != null && !adminToken.isBlank() && authHeader.equals(adminToken)) {
                 userRole = "ADMIN";
-            } else if (authHeader.equals(readOnlyToken)) {
+            } else if (readOnlyToken != null && !readOnlyToken.isBlank() && authHeader.equals(readOnlyToken)) {
                 userRole = "READ_ONLY";
             } else {
                 // 2. Validate JWT token

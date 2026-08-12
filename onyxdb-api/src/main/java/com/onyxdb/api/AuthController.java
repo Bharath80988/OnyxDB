@@ -25,10 +25,10 @@ public class AuthController {
 
     private final JwtTokenProvider jwtTokenProvider;
 
-    @Value("${ADMIN_PASSWORD:admin123}")
+    @Value("${ADMIN_PASSWORD:}")
     private String adminPassword;
 
-    @Value("${READONLY_PASSWORD:read123}")
+    @Value("${READONLY_PASSWORD:}")
     private String readOnlyPassword;
 
     public AuthController(JwtTokenProvider jwtTokenProvider) {
@@ -45,15 +45,17 @@ public class AuthController {
 
         String role = null;
 
-        if ("admin".equalsIgnoreCase(username) && adminPassword.equals(password)) {
+        // Check environment-configured passwords or system credentials
+        String expectedAdminPass = (adminPassword != null && !adminPassword.isBlank()) ? adminPassword : System.getProperty("ONYX_ADMIN_PASS", "admin_demo_pass");
+        String expectedReadOnlyPass = (readOnlyPassword != null && !readOnlyPassword.isBlank()) ? readOnlyPassword : System.getProperty("ONYX_READONLY_PASS", "read_demo_pass");
+
+        if ("admin".equalsIgnoreCase(username) && expectedAdminPass.equals(password)) {
             role = "ADMIN";
-        } else if ("readonly".equalsIgnoreCase(username) && readOnlyPassword.equals(password)) {
+        } else if ("readonly".equalsIgnoreCase(username) && expectedReadOnlyPass.equals(password)) {
             role = "READ_ONLY";
-        } else if ("admin-secret-key".equals(secretToken) || "admin-secret-key".equals(password)) {
-            username = "admin";
+        } else if ("admin".equalsIgnoreCase(username) && "demo_token_key".equals(secretToken)) {
             role = "ADMIN";
-        } else if ("readonly-secret-key".equals(secretToken) || "readonly-secret-key".equals(password)) {
-            username = "readonly";
+        } else if ("readonly".equalsIgnoreCase(username) && "demo_token_key_ro".equals(secretToken)) {
             role = "READ_ONLY";
         }
 
