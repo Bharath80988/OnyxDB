@@ -64,7 +64,7 @@ export default function AppNavbar() {
                 >
                   {isActive && (
                     <motion.div
-                      layoutId="appleNavActivePill"
+                      layoutId="glassNavActivePill"
                       className="absolute inset-0 bg-white rounded-full -z-10 shadow-sm"
                       transition={{ type: 'spring', stiffness: 380, damping: 30 }}
                     />

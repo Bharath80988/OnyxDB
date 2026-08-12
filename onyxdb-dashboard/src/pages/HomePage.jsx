@@ -51,7 +51,7 @@ export default function HomePage() {
       {/* Background Video */}
       <BackgroundVideo />
 
-      {/* Unified Apple Navbar */}
+      {/* Unified Glassmorphism Navbar */}
       <AppNavbar />
 
       {/* Main Hero Section */}
