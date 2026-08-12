@@ -1,16 +1,16 @@
 export class MockEngine {
-  private static readonly STORAGE_KEY = 'onyxdb_mock_storage';
+  static STORAGE_KEY = 'onyxdb_mock_storage';
 
-  private static getStorage(): Record<string, any[]> {
+  static getStorage() {
     const data = localStorage.getItem(this.STORAGE_KEY);
     return data ? JSON.parse(data) : {};
   }
 
-  private static saveStorage(data: Record<string, any[]>) {
+  static saveStorage(data) {
     localStorage.setItem(this.STORAGE_KEY, JSON.stringify(data));
   }
 
-  public static execute(queryText: string): Promise<any> {
+  static execute(queryText) {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
         try {
@@ -31,7 +31,6 @@ export class MockEngine {
               return reject(new Error("Insert data must contain an 'id'"));
             }
             
-            // Upsert logic for mock
             const existingIdx = db[table].findIndex(r => r.id === data.id);
             if (existingIdx >= 0) {
               db[table][existingIdx] = data;
@@ -60,10 +59,10 @@ export class MockEngine {
           } else {
             reject(new Error(`Action '${action}' is not supported in MockEngine.`));
           }
-        } catch (e: any) {
+        } catch (e) {
           reject(new Error("Invalid JSON Query: " + e.message));
         }
-      }, 300); // Simulate network latency
+      }, 300);
     });
   }
 }

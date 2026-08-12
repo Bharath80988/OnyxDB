@@ -23,13 +23,13 @@ This document summarizes the current status, active capabilities, upcoming featu
 - [x] **Interactive Onyx CLI**: Terminal REPL shell with command suggestions and query execution (`OnyxCli.java`).
 - [x] **High-Level Client SDKs**: Built-in helper wrappers in Python (`onyxdb.py`) and Node.js (`OnyxClient`).
 - [x] **Multi-Language Package Distribution**: Published zero-dependency Python package (`pip install onyxdb`) and Node.js package (`npx onyxdb`).
+- [x] **JWT Authentication & Studio Login**: Full-stack HMAC-SHA256 JWT auth (`JwtTokenProvider.java`), `/api/auth/login` endpoint, terminal CLI prompt (`OnyxCli.java`), and visual Onyx Studio login UI (`LoginPage.tsx`).
 
 ---
 
 ## Upcoming Roadmap
 
 - [ ] **Multiversion Concurrency Control (MVCC)**: Snapshot isolation without read locks.
-- [ ] **JWT Authentication**: Signed JWT tokens replacing raw secret headers.
 - [ ] **Distributed Consensus (Raft)**: Multi-node distributed cluster setup.
 
 ---

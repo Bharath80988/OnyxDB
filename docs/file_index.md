@@ -84,6 +84,13 @@ This document catalogs all major source files across the **OnyxDB** codebase, ou
 * **Dependencies:** `ServerSocketChannel`, `Selector`, `ExecutionEngine`.
 * **Used By:** `OnyxDbConfig.java`, `NativeSocketServerTest.java`.
 
+### 10. `JwtTokenProvider.java` & `AuthController.java`
+* **Path:** [`onyxdb-api/src/main/java/com/onyxdb/api/security/JwtTokenProvider.java`](file:///d:/db/onyxdb-api/src/main/java/com/onyxdb/api/security/JwtTokenProvider.java)
+* **Purpose:** Zero-dependency HMAC-SHA256 JWT provider and authentication REST controller (`POST /api/auth/login`).
+* **Responsibilities:** Generates signed JWT bearer tokens, validates claims, and manages user login authentication.
+* **Dependencies:** Standard Java Cryptography (`javax.crypto.Mac`), Base64URL, Jackson `ObjectMapper`.
+* **Used By:** `QueryController.java`, `AuthController.java`, `JwtAuthTest.java`.
+
 ---
 
 ## `onyxdb-dashboard` UI Files

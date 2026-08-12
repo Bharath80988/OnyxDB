@@ -45,6 +45,36 @@ Upon initialization, OnyxDB starts the following services:
 
 ---
 
+## Authentication & Security
+
+OnyxDB features full-stack **JWT Authentication** and claims-based **Role-Based Access Control (RBAC)**:
+
+### 1. Authenticate & Obtain Token
+```bash
+curl -X POST http://localhost:8080/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username": "admin", "password": "admin123"}'
+```
+**Response**:
+```json
+{
+  "status": "success",
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "role": "ADMIN",
+  "expires_in": 86400
+}
+```
+
+### 2. Include Bearer Token in Requests
+```bash
+curl -X POST http://localhost:8080/api/query \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1Ni..." \
+  -d '{"action": "select", "table": "users"}'
+```
+
+---
+
 ## Simple Querying Options
 
 OnyxDB provides three intuitive ways to query data:

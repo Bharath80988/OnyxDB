@@ -56,6 +56,18 @@ public class OnyxCli {
         try {
             ExecutionEngine engine = new ExecutionEngine(Paths.get(dataDir));
             Scanner scanner = new Scanner(System.in);
+
+            // ─── CLI Startup Login Prompt ──────────────────────────────────────────
+            String userRole = "ADMIN"; // Default
+            System.out.print(BOLD + "Authentication Username (default: admin): " + RESET);
+            if (scanner.hasNextLine()) {
+                String inputUser = scanner.nextLine().trim();
+                if ("readonly".equalsIgnoreCase(inputUser)) {
+                    userRole = "READ_ONLY";
+                }
+            }
+            System.out.println(GREEN + "Authenticated as [" + userRole + "]" + RESET + "\n");
+
             StringBuilder multiLineBuffer = new StringBuilder();
 
             while (true) {
@@ -100,6 +112,13 @@ public class OnyxCli {
 
                 // ─── Meta-commands ────────────────────────────────────────────────────
                 if (handleMetaCommand(input, engine)) {
+                    continue;
+                }
+
+                // ─── RBAC Role Enforcement in CLI ──────────────────────────────────────
+                String upperQuery = input.trim().toUpperCase();
+                if ("READ_ONLY".equals(userRole) && (upperQuery.startsWith("INSERT") || upperQuery.startsWith("UPDATE") || upperQuery.startsWith("DELETE") || upperQuery.startsWith("INDEX"))) {
+                    System.out.println(RED + "ERROR: Forbidden - READ_ONLY session cannot execute mutative operations." + RESET);
                     continue;
                 }
 

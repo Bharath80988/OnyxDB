@@ -6,6 +6,13 @@ This document tracks the complete chronological version history of **OnyxDB** fr
 
 ## Version Timeline
 
+### v4.1.0 — Full-Stack JWT Authentication, AuthController & Studio Login Screen
+- **Zero-Dependency JWT Provider ([`JwtTokenProvider.java`](file:///d:/db/onyxdb-api/src/main/java/com/onyxdb/api/security/JwtTokenProvider.java))**: Lightweight HMAC-SHA256 token generation, Base64URL encoding, and claims-based RBAC parsing (`sub`, `role`, `exp`).
+- **REST Authentication Endpoint ([`AuthController.java`](file:///d:/db/onyxdb-api/src/main/java/com/onyxdb/api/AuthController.java))**: Added `POST /api/auth/login` endpoint issuing signed JWT Bearer tokens for `ADMIN` and `READ_ONLY` accounts.
+- **Dynamic Rest API & Terminal CLI Auth**: Integrated token verification into [`QueryController.java`](file:///d:/db/onyxdb-api/src/main/java/com/onyxdb/api/QueryController.java) and startup authentication prompt in [`OnyxCli.java`](file:///d:/db/onyxdb-api/src/main/java/com/onyxdb/api/cli/OnyxCli.java).
+- **Onyx Studio Visual Login Page ([`LoginPage.tsx`](file:///d:/db/onyxdb-dashboard/src/pages/LoginPage.tsx))**: Glassmorphic login UI screen, session storage token management, and user role badges in [`Navbar.tsx`](file:///d:/db/onyxdb-dashboard/src/components/Navbar.tsx).
+- **Unit Test Suite ([`JwtAuthTest.java`](file:///d:/db/onyxdb-api/src/test/java/com/onyxdb/api/security/JwtAuthTest.java))**: 100% test coverage for token generation, claims extraction, tampered signature rejection, and token expiration.
+
 ### v4.0.0 — Onyx Wire Protocol, EXPLAIN Profiler, Hybrid Search & Interactive CLI
 - **Onyx Wire Protocol (OWP)**: 9-byte binary header socket protocol (`0x4F4E5958` "ONYX" magic bytes) over NIO TCP socket streams.
 - **`EXPLAIN` Query Profiler**: Cost-Based Query Optimizer (CBO) plan inspection detailing plan types (`POINT_LOOKUP`, `SECONDARY_INDEX_SCAN`, `FULL_TABLE_SCAN`) and I/O costs.
