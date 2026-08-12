@@ -1,31 +1,163 @@
-@import '@fontsource/inter/400.css';
-@import '@fontsource/inter/600.css';
-@import '@fontsource/inter/700.css';
-@import '@fontsource/space-grotesk/500.css';
-@import '@fontsource/space-grotesk/700.css';
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@layer components {
-  .glass-panel {
-    @apply bg-white/60 dark:bg-onyx-800/40 backdrop-blur-xl border border-gray-200 dark:border-onyx-600/50 shadow-xl;
-  }
-  
-  .glass-card {
-    @apply bg-white/80 dark:bg-onyx-700/60 backdrop-blur-lg border border-gray-200 dark:border-onyx-600/50 rounded-2xl shadow-lg;
-  }
+/* ─── CSS Variables ─── */
+:root {
+  --bg: #000000;
+  --text: #ffffff;
+  --muted: #a3a3a3;
+  --nav-text: #171717;
+  --pill-dark: #28282a;
+  --sign-in-text: #e5e5e5;
+  --nav-shadow: 0 4px 18px rgba(0, 0, 0, 0.25);
+  --trust-bg: #222225;
+  --trust-border: rgba(255, 255, 255, 0.45);
+  --trust-text: #e0e0e0;
+  --font-sans: "Inter", "Segoe UI", system-ui, sans-serif;
+  --font-display: "BubbledotICG-FinePos", "Geist Pixel Circle", monospace;
+  --ease-spring: cubic-bezier(0.22, 1, 0.36, 1);
+}
 
-  .text-gradient {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary;
-  }
+/* ─── Geist Pixel Fallback Font-Face ─── */
+@font-face {
+  font-family: "Geist Pixel Circle";
+  src: url("/fonts/GeistPixel-Circle.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}
 
-  .glow-button {
-    @apply transition-all duration-300 hover:shadow-glow-primary hover:-translate-y-0.5;
-  }
+/* ─── Global Reset & Body ─── */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  min-height: 100%;
 }
 
 body {
-  @apply bg-gray-50 text-gray-900 dark:bg-onyx-900 dark:text-onyx-100 font-sans antialiased selection:bg-primary/30 selection:text-primary dark:selection:text-white min-h-screen transition-colors duration-300;
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-weight: 500;
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* ─── Display Font Utility ─── */
+.font-display {
+  font-family: var(--font-display);
+  font-weight: 700;
+}
+
+/* ─── Trust Avatars Overlap & Lifting ─── */
+.trust-avatar-1 {
+  z-index: 1;
+  transition: transform 0.35s var(--ease-spring);
+}
+.trust-avatar-1:hover {
+  transform: translateY(-2px);
+}
+
+.trust-avatar-2 {
+  margin-left: calc(var(--trust-size, 42px) * -0.42);
+  z-index: 2;
+  transition: transform 0.35s var(--ease-spring);
+}
+.trust-avatar-2:hover {
+  transform: translateY(-4px);
+}
+
+.trust-avatar-3 {
+  margin-left: calc(var(--trust-size, 42px) * -0.42);
+  z-index: 4;
+  transition: transform 0.35s var(--ease-spring);
+}
+.trust-avatar-3:hover {
+  transform: translateY(-2px);
+}
+
+/* ─── Keyframe Animations ─── */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes headlineFade {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: translateY(22px) scale(0.98);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes dotPulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.45;
+    transform: scale(1.45);
+  }
+}
+
+/* ─── High Contrast Scrollbar ─── */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+::-webkit-scrollbar-track {
+  background: #000000;
+}
+::-webkit-scrollbar-thumb {
+  background: #404040;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #666666;
+}
+
+/* ─── Accessibility ─── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
