@@ -1,4 +1,4 @@
-name: OnyxDB CI
+name: ForgeQL CI
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    name: Build & Test OnyxDB
+    name: Build & Test ForgeQL
     runs-on: ubuntu-latest
 
     steps:
@@ -27,7 +27,7 @@ jobs:
         with:
           node-version: '22'
           cache: 'npm'
-          cache-dependency-path: onyxdb-dashboard/package-lock.json
+          cache-dependency-path: forgeql-dashboard/package-lock.json
 
       - name: Build Frontend & Maven Packages
         run: |
