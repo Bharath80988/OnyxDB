@@ -1,12 +1,12 @@
-# OnyxDB — Product Architecture and Technical Feature Comparison
+# ForgeQL — Product Architecture and Technical Feature Comparison
 
-This document provides a clear technical comparison explaining how **OnyxDB** compares against traditional database systems (MySQL, PostgreSQL, and MongoDB). It highlights key operating system, networking, and algorithmic design choices.
+This document provides a clear technical comparison explaining how **ForgeQL** compares against traditional database systems (MySQL, PostgreSQL, and MongoDB). It highlights key operating system, networking, and algorithmic design choices.
 
 ---
 
-## 1. OnyxDB vs. Traditional Databases (MySQL, PostgreSQL, MongoDB)
+## 1. ForgeQL vs. Traditional Databases (MySQL, PostgreSQL, MongoDB)
 
-| Feature / System Domain | MySQL (InnoDB) | PostgreSQL | MongoDB | **OnyxDB (v3.0.0)** |
+| Feature / System Domain | MySQL (InnoDB) | PostgreSQL | MongoDB | **ForgeQL (v3.0.0)** |
 | :--- | :--- | :--- | :--- | :--- |
 | **Database Type** | Relational Database | Relational Database | Document Store | **Hybrid B+ Tree and AI Vector Engine** |
 | **Deployment Model** | External Server | System Service | External Daemon Process | **Embedded Library or Standalone JAR** |
@@ -20,15 +20,15 @@ This document provides a clear technical comparison explaining how **OnyxDB** co
 
 ---
 
-## 2. Core Differences in OnyxDB
+## 2. Core Differences in ForgeQL
 
 ### A. Combined Relational and AI Vector Engine
 Traditional setups require running separate relational databases for structured data and specialized vector databases for AI embeddings. 
-- **OnyxDB combines both into a single engine**: Leaf nodes in OnyxDB can store both structured JSON data and high-dimensional floating-point vectors. This enables developers to run exact vector similarity searches and relational foreign key queries in the same database.
+- **ForgeQL combines both into a single engine**: Leaf nodes in ForgeQL can store both structured JSON data and high-dimensional floating-point vectors. This enables developers to run exact vector similarity searches and relational foreign key queries in the same database.
 
 ### B. Embedded Operation Without Setup
-- OnyxDB requires no user setup scripts, configuration files, or Docker setups.
-- It runs inside your Java application or as a standalone process (`npx onyxdb` or `pip install onyxdb`), automatically creating database files (`<table_name>.db`) on demand.
+- ForgeQL requires no user setup scripts, configuration files, or Docker setups.
+- It runs inside your Java application or as a standalone process (`npx forgeql` or `pip install forgeql`), automatically creating database files (`<table_name>.db`) on demand.
 
 ---
 
@@ -36,18 +36,18 @@ Traditional setups require running separate relational databases for structured 
 
 ### A. Zero-Copy Memory Mapping (`MmapStorageManager`)
 - Standard database systems execute frequent file read and write system calls, causing context switches between user space and kernel space.
-- **OnyxDB uses memory-mapped files (`FileChannel.map`)**: Database files (`.db`) are mapped directly into the Operating System Virtual Memory Page Cache.
+- **ForgeQL uses memory-mapped files (`FileChannel.map`)**: Database files (`.db`) are mapped directly into the Operating System Virtual Memory Page Cache.
 - **Benefit**: Page lookups happen directly through off-heap memory pointers. The operating system kernel manages background page writes to storage asynchronously without blocking application threads.
 
 ### B. Off-Heap Direct Memory Buffers
-- OnyxDB uses off-heap direct memory buffers (`ByteBuffer.allocateDirect`) to bypass the Java Garbage Collector, eliminating garbage collection pauses during heavy database traffic.
+- ForgeQL uses off-heap direct memory buffers (`ByteBuffer.allocateDirect`) to bypass the Java Garbage Collector, eliminating garbage collection pauses during heavy database traffic.
 
 ---
 
 ## 4. Networking Optimizations
 
 ### A. Round-Robin Multi-Reactor Event Loop Architecture
-- OnyxDB uses a multi-reactor event loop pattern:
+- ForgeQL uses a multi-reactor event loop pattern:
   - **Acceptor Thread**: A central acceptor thread listens for incoming client TCP socket connections on port `8081`.
   - **Round-Robin Worker Pool**: Incoming socket connections are assigned across CPU worker threads using a Round-Robin algorithm.
 - **Benefit**: Avoids thread lock contention and ensures efficient multi-core CPU usage for low latency queries.

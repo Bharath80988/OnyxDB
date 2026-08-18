@@ -1,5 +1,5 @@
 """
-OnyxDB Basic Query Example (Python SDK)
+ForgeQL Basic Query Example (Python SDK)
 =======================================
 Demonstrates basic record creation, selection, and primary key lookups via HTTP REST API.
 """
@@ -14,7 +14,7 @@ HEADERS = {
 }
 
 def main():
-    print("🚀 Connecting to OnyxDB on http://localhost:8080...")
+    print("🚀 Connecting to ForgeQL on http://localhost:8080...")
 
     # 1. Insert Record
     insert_payload = {
@@ -23,18 +23,18 @@ def main():
         "data": {
             "id": 101,
             "username": "alice",
-            "email": "alice@onyxdb.io",
+            "email": "alice@forgeql.io",
             "role": "ADMIN"
         }
     }
     res = requests.post(f"{DB_URL}/api/query", json=insert_payload, headers=HEADERS)
     print("Insert Response:", res.json())
 
-    # 2. Execute OQS Point Lookup
-    oqs_payload = {
-        "oqs": "GET users 101"
+    # 2. Execute FQL Point Lookup
+    fql_payload = {
+        "fql": "GET users 101"
     }
-    res = requests.post(f"{DB_URL}/api/query", json=oqs_payload, headers=HEADERS)
+    res = requests.post(f"{DB_URL}/api/query", json=fql_payload, headers=HEADERS)
     print("Point Lookup Response:", res.json())
 
 if __name__ == "__main__":

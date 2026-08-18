@@ -1,6 +1,6 @@
-# OnyxDB v4.0.0 Master Architecture Roadmap
+# ForgeQL v4.0.0 Master Architecture Roadmap
 
-This document outlines the master architecture roadmap for **OnyxDB v4.0.0**, organizing technical enhancements across core subsystems: Storage, Indexing, AI & Vector Search, Networking, Query Engine, Developer Experience, Onyx Studio Visual IDE, and Long-Term Enterprise Features.
+This document outlines the master architecture roadmap for **ForgeQL v4.0.0**, organizing technical enhancements across core subsystems: Storage, Indexing, AI & Vector Search, Networking, Query Engine, Developer Experience, Forge Studio Visual IDE, and Long-Term Enterprise Features.
 
 ---
 
@@ -62,7 +62,7 @@ This document outlines the master architecture roadmap for **OnyxDB v4.0.0**, or
 
 ## 4. Networking Engine Subsystem
 
-### 12. Onyx Wire Protocol (OWP)
+### 12. Forge Wire Protocol (OWP)
 - **Status:** Implemented (v4.0.0)
 - **Description:** Binary wire protocol replacing raw JSON over TCP sockets for lower latency and smaller packet overhead.
 
@@ -82,12 +82,12 @@ This document outlines the master architecture roadmap for **OnyxDB v4.0.0**, or
 
 ## 5. Query Engine Subsystem
 
-### 16. Onyx Query Language (OQL)
-- **Status:** Implemented (v3.0.0 - OQS / OQL syntax engine)
+### 16. Forge Query Language (OQL)
+- **Status:** Implemented (v3.0.0 - FQL / OQL syntax engine)
 - **Description:** Human-friendly, SQL-inspired declarative query syntax (e.g. `FIND users WHERE age > 20`).
 
 ### 17. Lexer, Parser, and AST Execution Planner
-- **Status:** Implemented (v3.0.0 - OQS AST Parser)
+- **Status:** Implemented (v3.0.0 - FQL AST Parser)
 - **Description:** Converts OQL text into Abstract Syntax Tree (AST) nodes and translates AST into `ExecutionEngine` execution steps.
 
 ### 18. `EXPLAIN` Query Profiler
@@ -98,17 +98,17 @@ This document outlines the master architecture roadmap for **OnyxDB v4.0.0**, or
 
 ## 6. Developer Experience & Distribution Subsystem
 
-### 19. Interactive Onyx CLI
+### 19. Interactive Forge CLI
 - **Status:** Implemented (v4.0.0)
-- **Description:** Terminal REPL (`OnyxCli.java`) featuring auto-completion, syntax suggestions, execution timing, and query execution.
+- **Description:** Terminal REPL (`ForgeCli.java`) featuring auto-completion, syntax suggestions, execution timing, and query execution.
 
 ### 20. Multi-Language Client SDKs (Python & Node.js)
-- **Status:** Implemented (PyPI `onyxdb` & NPM `onyxdb`)
-- **Description:** Python Pip package (`pip install onyxdb`) and Node.js package (`npx onyxdb`) offering embedded server bootstrapping and socket driver clients.
+- **Status:** Implemented (PyPI `forgeql` & NPM `forgeql`)
+- **Description:** Python Pip package (`pip install forgeql`) and Node.js package (`npx forgeql`) offering embedded server bootstrapping and socket driver clients.
 
 ---
 
-## 7. Onyx Studio (Visual Database IDE)
+## 7. Forge Studio (Visual Database IDE)
 
 ### 21. Drag-and-Drop Database Designer
 - Visual canvas for designing tables, defining column data types, and establishing foreign key relationships.

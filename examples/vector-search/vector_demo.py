@@ -1,5 +1,5 @@
 """
-OnyxDB Native HNSW Vector Search Example (Python SDK)
+ForgeQL Native HNSW Vector Search Example (Python SDK)
 =====================================================
 Demonstrates loading AI embeddings into HNSW graphs and executing KNN similarity searches.
 """
@@ -14,7 +14,7 @@ HEADERS = {
 }
 
 def main():
-    print("🤖 Executing HNSW Vector KNN Search in OnyxDB...")
+    print("🤖 Executing HNSW Vector KNN Search in ForgeQL...")
 
     # Query 1536-dimensional or 4-dimensional vector embedding
     vector_query = {

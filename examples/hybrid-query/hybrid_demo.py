@@ -1,5 +1,5 @@
 """
-OnyxDB Hybrid Relational + Vector Query Example (Python SDK)
+ForgeQL Hybrid Relational + Vector Query Example (Python SDK)
 ============================================================
 Demonstrates combining relational filters with HNSW Cosine Similarity vector search.
 """

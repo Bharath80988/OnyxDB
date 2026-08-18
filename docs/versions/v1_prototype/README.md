@@ -1,7 +1,7 @@
 # Version 1 (Prototype Iterations: Day 1 - Day 8)
 
 ## Purpose
-This archive preserves the early rapid-prototyping notes, milestone daily logs, and initial development trajectory of OnyxDB from Day 1 through Day 8.
+This archive preserves the early rapid-prototyping notes, milestone daily logs, and initial development trajectory of ForgeQL from Day 1 through Day 8.
 
 ## Features Implemented in this Version
 - B+ Tree indexing engine and slotted pages (8KB pages).
@@ -23,8 +23,8 @@ Consolidated into the production-grade, enterprise-standard architecture. Rapid 
 ## Replaced By
 - Active Architecture Documentation: [`PROJECT_STRUCTURE.md`](../../PROJECT_STRUCTURE.md) & [`PATHS.md`](../../PATHS.md)
 - Active System Status: [`STATUS.md`](../../STATUS.md)
-- Production Core Storage Engine: [`com.onyxdb.core`](../../onyxdb-core/src/main/java/com/onyxdb/core)
-- Production REST API Service: [`com.onyxdb.api`](../../onyxdb-api/src/main/java/com/onyxdb/api)
+- Production Core Storage Engine: [`com.forgeql.core`](../../forgeql-core/src/main/java/com/forgeql/core)
+- Production REST API Service: [`com.forgeql.api`](../../forgeql-api/src/main/java/com/forgeql/api)
 
 ## Date Archived
 July 28, 2026

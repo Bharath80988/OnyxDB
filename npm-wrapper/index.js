@@ -6,13 +6,13 @@ const https = require('https');
 const http = require('http');
 const { spawn, execSync } = require('child_process');
 
-const JAR_NAME = 'onyxdb-api-0.2.0.jar';
+const JAR_NAME = 'forgeql-api-0.2.0.jar';
 const JAR_PATH = path.join(__dirname, JAR_NAME);
-const DOWNLOAD_URL = `https://github.com/Bharath80988/OnyxDB/releases/download/v0.2.0/${JAR_NAME}`;
+const DOWNLOAD_URL = `https://github.com/Bharath80988/ForgeQL/releases/download/v0.2.0/${JAR_NAME}`;
 
 function downloadJar() {
     return new Promise((resolve, reject) => {
-        console.log(`Downloading OnyxDB engine from ${DOWNLOAD_URL}...`);
+        console.log(`Downloading ForgeQL engine from ${DOWNLOAD_URL}...`);
         const file = fs.createWriteStream(JAR_PATH);
         
         function handleResponse(response) {
@@ -22,7 +22,7 @@ function downloadJar() {
             }
             if (response.statusCode !== 200) {
                 fs.unlink(JAR_PATH, () => {});
-                reject(new Error(`Failed to download OnyxDB jar (HTTP ${response.statusCode}). Make sure the GitHub release exists!`));
+                reject(new Error(`Failed to download ForgeQL jar (HTTP ${response.statusCode}). Make sure the GitHub release exists!`));
                 return;
             }
             response.pipe(file);
@@ -47,9 +47,9 @@ function checkJava() {
     }
 }
 
-async function startOnyxDB() {
+async function startForgeQL() {
     if (!checkJava()) {
-        console.error("Java 21+ is not installed or not in PATH! Please install Java to run OnyxDB.");
+        console.error("Java 21+ is not installed or not in PATH! Please install Java to run ForgeQL.");
         process.exit(1);
     }
 
@@ -59,15 +59,15 @@ async function startOnyxDB() {
         console.log('Download complete!');
     }
 
-    console.log('Starting OnyxDB...');
+    console.log('Starting ForgeQL...');
     const javaProcess = spawn('java', ['-jar', JAR_PATH], { stdio: 'inherit' });
 
     javaProcess.on('close', (code) => {
-        console.log(`OnyxDB exited with code ${code}`);
+        console.log(`ForgeQL exited with code ${code}`);
     });
 }
 
-class OnyxClient {
+class ForgeClient {
     constructor(host = 'http://localhost:8080', token = 'admin-secret-key') {
         this.host = host.replace(/\/$/, '');
         this.token = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
@@ -131,14 +131,14 @@ class OnyxClient {
         return this._request({ action: 'vector_search', table, vector, k });
     }
 
-    oqs(queryString) {
-        /** Execute a string query in Onyx Query Syntax (e.g. 'GET users 101'). */
-        return this._request({ oqs: queryString });
+    fql(queryString) {
+        /** Execute a string query in Forge Query Syntax (e.g. 'GET users 101'). */
+        return this._request({ fql: queryString });
     }
 
     explain(queryString) {
-        /** Return the Cost-Based Optimizer (CBO) execution plan for an OQS query string. */
-        return this._request({ oqs: `EXPLAIN ${queryString}` });
+        /** Return the Cost-Based Optimizer (CBO) execution plan for an FQL query string. */
+        return this._request({ fql: `EXPLAIN ${queryString}` });
     }
 
     hybridSearch(table, vector, where = null, k = 5) {
@@ -155,7 +155,7 @@ class OnyxClient {
 }
 
 if (require.main === module) {
-    startOnyxDB();
+    startForgeQL();
 }
 
-module.exports = { OnyxClient, startOnyxDB };
+module.exports = { ForgeClient, startForgeQL };

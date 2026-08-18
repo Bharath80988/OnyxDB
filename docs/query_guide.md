@@ -1,6 +1,6 @@
-# OnyxDB — Comprehensive Query Guide and Syntax Reference
+# ForgeQL — Comprehensive Query Guide and Syntax Reference
 
-This document provides a developer reference manual for querying **OnyxDB** using JSON payloads over HTTP REST and TCP socket connections.
+This document provides a developer reference manual for querying **ForgeQL** using JSON payloads over HTTP REST and TCP socket connections.
 
 ---
 
@@ -22,17 +22,17 @@ Authorization: Bearer <token>
 
 ---
 
-## 2. Onyx Query Syntax (OQS)
+## 2. Forge Query Syntax (FQL)
 
-OnyxDB supports string queries via the `"oqs"` key:
+ForgeQL supports string queries via the `"fql"` key:
 
 ```json
 {
-  "oqs": "GET users 101"
+  "fql": "GET users 101"
 }
 ```
 
-### Supported OQS Commands:
+### Supported FQL Commands:
 - **`GET <table> <id>`**: Point lookup by record primary key (`GET users 101`).
 - **`FIND <table> WHERE <field> = <val>`**: Filtered table search (`FIND users WHERE status = ACTIVE`).
 - **`EXPLAIN <query>`**: Output Cost-Based Optimizer (CBO) plan and I/O estimate (`EXPLAIN FIND users WHERE status = ACTIVE`).
@@ -43,18 +43,18 @@ OnyxDB supports string queries via the `"oqs"` key:
 
 ---
 
-## 2.1 Onyx Wire Protocol (OWP) Binary Framing Protocol
+## 2.1 Forge Wire Protocol (OWP) Binary Framing Protocol
 
 On port `8081`, TCP sockets support zero-copy binary framing with a 9-byte header:
 
 ```
 +-------------------+---------------+----------------------+------------------+
 | Magic (4 Bytes)   | Type (1 Byte) | Length (4 Bytes BE)  | Payload (Bytes)  |
-| 0x4F4E5958 "ONYX" | 0x01 / 0x03   | N                    | UTF-8 Payload    |
+| 0x4F4E5958 "FORGE" | 0x01 / 0x03   | N                    | UTF-8 Payload    |
 +-------------------+---------------+----------------------+------------------+
 ```
 
-- **`0x01` (MSG_QUERY)**: Standard OQS or JSON query payload.
+- **`0x01` (MSG_QUERY)**: Standard FQL or JSON query payload.
 - **`0x02` (MSG_RESPONSE)**: Engine response payload.
 - **`0x03` (MSG_EXPLAIN)**: Cost profiler execution plan output.
 
@@ -107,7 +107,7 @@ Inserts a new record into the specified table. Automatically creates `<table_nam
 }
 ```
 
-> If foreign key constraints are defined on `orders.user_id`, OnyxDB verifies that `id: 1` exists in the `users` parent table. If missing, a Foreign Key Constraint Error is thrown.
+> If foreign key constraints are defined on `orders.user_id`, ForgeQL verifies that `id: 1` exists in the `users` parent table. If missing, a Foreign Key Constraint Error is thrown.
 
 ---
 
@@ -234,7 +234,7 @@ Here is a step-by-step example showing how to set up relational tables and execu
 {
   "action": "insert",
   "table": "users",
-  "data": { "id": 1, "name": "Alice", "email": "alice@onyx.db", "role": "VIP" }
+  "data": { "id": 1, "name": "Alice", "email": "alice@forge.db", "role": "VIP" }
 }
 ```
 

@@ -4,17 +4,17 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.onyxdb</groupId>
-    <artifactId>onyxdb-parent</artifactId>
-    <version>0.2.0</version>
+    <groupId>com.forgeql</groupId>
+    <artifactId>forgeql-parent</artifactId>
+    <version>4.0.0</version>
     <packaging>pom</packaging>
 
-    <name>OnyxDB</name>
+    <name>ForgeQL</name>
     <description>A local-first, embeddable relational database</description>
 
     <modules>
-        <module>onyxdb-core</module>
-        <module>onyxdb-api</module>
+        <module>forgeql-core</module>
+        <module>forgeql-api</module>
     </modules>
 
     <properties>

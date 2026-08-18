@@ -1,23 +1,23 @@
-# OnyxDB - Version History Timeline
+# ForgeQL - Version History Timeline
 
-This document tracks the complete chronological version history of **OnyxDB** from initial prototype to enterprise baseline.
+This document tracks the complete chronological version history of **ForgeQL** from initial prototype to enterprise baseline.
 
 ---
 
 ## Version Timeline
 
 ### v4.1.0 — Full-Stack JWT Authentication, AuthController & Studio Login Screen
-- **Zero-Dependency JWT Provider ([`JwtTokenProvider.java`](file:///d:/db/onyxdb-api/src/main/java/com/onyxdb/api/security/JwtTokenProvider.java))**: Lightweight HMAC-SHA256 token generation, Base64URL encoding, and claims-based RBAC parsing (`sub`, `role`, `exp`).
-- **REST Authentication Endpoint ([`AuthController.java`](file:///d:/db/onyxdb-api/src/main/java/com/onyxdb/api/AuthController.java))**: Added `POST /api/auth/login` endpoint issuing signed JWT Bearer tokens for `ADMIN` and `READ_ONLY` accounts.
-- **Dynamic Rest API & Terminal CLI Auth**: Integrated token verification into [`QueryController.java`](file:///d:/db/onyxdb-api/src/main/java/com/onyxdb/api/QueryController.java) and startup authentication prompt in [`OnyxCli.java`](file:///d:/db/onyxdb-api/src/main/java/com/onyxdb/api/cli/OnyxCli.java).
-- **Onyx Studio Visual Login Page ([`LoginPage.tsx`](file:///d:/db/onyxdb-dashboard/src/pages/LoginPage.tsx))**: Glassmorphic login UI screen, session storage token management, and user role badges in [`Navbar.tsx`](file:///d:/db/onyxdb-dashboard/src/components/Navbar.tsx).
-- **Unit Test Suite ([`JwtAuthTest.java`](file:///d:/db/onyxdb-api/src/test/java/com/onyxdb/api/security/JwtAuthTest.java))**: 100% test coverage for token generation, claims extraction, tampered signature rejection, and token expiration.
+- **Zero-Dependency JWT Provider ([`JwtTokenProvider.java`](file:///d:/db/forgeql-api/src/main/java/com/forgeql/api/security/JwtTokenProvider.java))**: Lightweight HMAC-SHA256 token generation, Base64URL encoding, and claims-based RBAC parsing (`sub`, `role`, `exp`).
+- **REST Authentication Endpoint ([`AuthController.java`](file:///d:/db/forgeql-api/src/main/java/com/forgeql/api/AuthController.java))**: Added `POST /api/auth/login` endpoint issuing signed JWT Bearer tokens for `ADMIN` and `READ_ONLY` accounts.
+- **Dynamic Rest API & Terminal CLI Auth**: Integrated token verification into [`QueryController.java`](file:///d:/db/forgeql-api/src/main/java/com/forgeql/api/QueryController.java) and startup authentication prompt in [`ForgeCli.java`](file:///d:/db/forgeql-api/src/main/java/com/forgeql/api/cli/ForgeCli.java).
+- **Forge Studio Visual Login Page ([`LoginPage.tsx`](file:///d:/db/forgeql-dashboard/src/pages/LoginPage.tsx))**: Glassmorphic login UI screen, session storage token management, and user role badges in [`Navbar.tsx`](file:///d:/db/forgeql-dashboard/src/components/Navbar.tsx).
+- **Unit Test Suite ([`JwtAuthTest.java`](file:///d:/db/forgeql-api/src/test/java/com/forgeql/api/security/JwtAuthTest.java))**: 100% test coverage for token generation, claims extraction, tampered signature rejection, and token expiration.
 
-### v4.0.0 — Onyx Wire Protocol, EXPLAIN Profiler, Hybrid Search & Interactive CLI
-- **Onyx Wire Protocol (OWP)**: 9-byte binary header socket protocol (`0x4F4E5958` "ONYX" magic bytes) over NIO TCP socket streams.
+### v4.0.0 — Forge Wire Protocol, EXPLAIN Profiler, Hybrid Search & Interactive CLI
+- **Forge Wire Protocol (OWP)**: 9-byte binary header socket protocol (`0x4F4E5958` "FORGE" magic bytes) over NIO TCP socket streams.
 - **`EXPLAIN` Query Profiler**: Cost-Based Query Optimizer (CBO) plan inspection detailing plan types (`POINT_LOOKUP`, `SECONDARY_INDEX_SCAN`, `FULL_TABLE_SCAN`) and I/O costs.
 - **Hybrid Search Engine**: Single query execution path combining HNSW KNN Cosine vector search with secondary index / relational metadata filtering (`hybrid_search`).
-- **Interactive Onyx CLI**: Terminal REPL interactive shell with command auto-completion suggestions, execution timing, and formatted table outputs (`OnyxCli.java`).
+- **Interactive Forge CLI**: Terminal REPL interactive shell with command auto-completion suggestions, execution timing, and formatted table outputs (`ForgeCli.java`).
 
 ### v0.1.0 — Initial Engine Prototype
 - Storage Manager with 8KB disk page reads and writes using Java NIO.
@@ -38,8 +38,8 @@ This document tracks the complete chronological version history of **OnyxDB** fr
 - Environment variable configuration (`.env`).
 
 ### v2.2.0 — Multi-Platform Packaging & Distribution
-- Bundling React dashboard inside standalone executable Uber-JAR (`onyxdb-api`).
-- NPM wrapper (`npx onyxdb`) and Python Pip wrapper (`pip install onyxdb`).
+- Bundling React dashboard inside standalone executable Uber-JAR (`forgeql-api`).
+- NPM wrapper (`npx forgeql`) and Python Pip wrapper (`pip install forgeql`).
 - Docker multi-stage build optimization.
 
 ### v2.3.0 — B+ Tree Update/Delete & Binary Search Acceleration
@@ -56,23 +56,23 @@ This document tracks the complete chronological version history of **OnyxDB** fr
 - Enterprise codebase refactoring and documentation suite setup.
 
 ### v2.5.0 — Schema Normalization & Foreign Key Constraints
-- Cross-table relational links and Foreign Key constraint engine ([`ForeignKeyConstraint.java`](file:///d:/db/onyxdb-core/src/main/java/com/onyxdb/core/schema/ForeignKeyConstraint.java)).
-- Persistence manager ([`SchemaManager.java`](file:///d:/db/onyxdb-core/src/main/java/com/onyxdb/core/schema/SchemaManager.java)) for storing `.schema` files to disk across database restarts.
+- Cross-table relational links and Foreign Key constraint engine ([`ForeignKeyConstraint.java`](file:///d:/db/forgeql-core/src/main/java/com/forgeql/core/schema/ForeignKeyConstraint.java)).
+- Persistence manager ([`SchemaManager.java`](file:///d:/db/forgeql-core/src/main/java/com/forgeql/core/schema/SchemaManager.java)) for storing `.schema` files to disk across database restarts.
 - Dynamic query action `create_foreign_key`.
 - `RESTRICT` policy enforcement: blocks parent deletion when active child table references exist.
 - `CASCADE` policy enforcement: automatically deletes child table records when parent record is deleted.
-- Unit test coverage ([`ForeignKeyTest.java`](file:///d:/db/onyxdb-core/src/test/java/com/onyxdb/core/schema/ForeignKeyTest.java)).
+- Unit test coverage ([`ForeignKeyTest.java`](file:///d:/db/forgeql-core/src/test/java/com/forgeql/core/schema/ForeignKeyTest.java)).
 
-### v0.2.0 — Onyx Query Syntax, Simplified SDKs & Professional Baseline
-- **Onyx Query Syntax (OQS)**: Native string query parser (`ExecutionEngine.java`) for `GET`, `FIND`, `INSERT`, `UPDATE`, `DELETE`, and `INDEX` commands without JSON payload verbosity.
-- **Python SDK Enhancements (`onyxdb.py` & `pip-wrapper`)**: High-level helper methods (`db.get()`, `db.find()`, `db.insert()`, `db.update()`, `db.delete()`, `db.oqs()`).
-- **Node.js Client SDK (`npm-wrapper`)**: Exported `OnyxClient` helper class for Node applications.
-- **Pure Java JSON Parser**: Embedded zero-dependency JSON parser (`parseSimpleJsonObject`) in `onyxdb-core`.
+### v0.2.0 — Forge Query Syntax, Simplified SDKs & Professional Baseline
+- **Forge Query Syntax (FQL)**: Native string query parser (`ExecutionEngine.java`) for `GET`, `FIND`, `INSERT`, `UPDATE`, `DELETE`, and `INDEX` commands without JSON payload verbosity.
+- **Python SDK Enhancements (`forgeql.py` & `pip-wrapper`)**: High-level helper methods (`db.get()`, `db.find()`, `db.insert()`, `db.update()`, `db.delete()`, `db.fql()`).
+- **Node.js Client SDK (`npm-wrapper`)**: Exported `ForgeClient` helper class for Node applications.
+- **Pure Java JSON Parser**: Embedded zero-dependency JSON parser (`parseSimpleJsonObject`) in `forgeql-core`.
 - **Zero-Emoji Professional Documentation**: Clean, standardized documentation across `README.md` and module READMEs.
 
 ### v3.0.0 — OS Memory Mapping, Round-Robin Worker Pool & Native TCP Multiplexing
-- **OS Zero-Copy Memory Mapping ([`MmapStorageManager.java`](file:///d:/db/onyxdb-core/src/main/java/com/onyxdb/core/storage/MmapStorageManager.java))**: Maps `.db` physical disk files directly into OS Virtual Memory Page Cache (`MappedByteBuffer`), eliminating heap buffer copying and user-kernel context switching overhead.
+- **OS Zero-Copy Memory Mapping ([`MmapStorageManager.java`](file:///d:/db/forgeql-core/src/main/java/com/forgeql/core/storage/MmapStorageManager.java))**: Maps `.db` physical disk files directly into OS Virtual Memory Page Cache (`MappedByteBuffer`), eliminating heap buffer copying and user-kernel context switching overhead.
 - **Off-Heap Direct Memory Acceleration**: Uses `ByteBuffer.allocateDirect()` in `StorageManager.java` to bypass JVM Garbage Collection pauses during high-concurrency I/O.
-- **Round-Robin Multi-Reactor Event Loops ([`RoundRobinWorkerGroup.java`](file:///d:/db/onyxdb-api/src/main/java/com/onyxdb/api/network/RoundRobinWorkerGroup.java))**: Distributes client socket channels across CPU worker threads using a Round-Robin load-balancing algorithm.
-- **Non-Blocking Native TCP Server ([`OnyxNativeSocketServer.java`](file:///d:/db/onyxdb-api/src/main/java/com/onyxdb/api/network/OnyxNativeSocketServer.java))**: High-throughput socket server on port `8081` bypassing HTTP servlet overhead for low latency queries.
-- **Product Architecture Pitch ([`onyxdb_architecture_pitch.md`](file:///d:/db/docs/onyxdb_architecture_pitch.md))**: Technical competitive comparison against MySQL, PostgreSQL, and MongoDB.
+- **Round-Robin Multi-Reactor Event Loops ([`RoundRobinWorkerGroup.java`](file:///d:/db/forgeql-api/src/main/java/com/forgeql/api/network/RoundRobinWorkerGroup.java))**: Distributes client socket channels across CPU worker threads using a Round-Robin load-balancing algorithm.
+- **Non-Blocking Native TCP Server ([`ForgeNativeSocketServer.java`](file:///d:/db/forgeql-api/src/main/java/com/forgeql/api/network/ForgeNativeSocketServer.java))**: High-throughput socket server on port `8081` bypassing HTTP servlet overhead for low latency queries.
+- **Product Architecture Pitch ([`forgeql_architecture_pitch.md`](file:///d:/db/docs/forgeql_architecture_pitch.md))**: Technical competitive comparison against MySQL, PostgreSQL, and MongoDB.

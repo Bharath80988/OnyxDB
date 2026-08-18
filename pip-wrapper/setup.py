@@ -7,7 +7,7 @@ with open(os.path.join(os.path.dirname(__file__), "README.md"), "r", encoding="u
     long_description = fh.read()
 
 setup(
-    name='onyxdb',
+    name='forgeql',
     version='0.2.0',
     description='The Multi-Table Omni-Channel Database built on B+ Trees.',
     long_description=long_description,
@@ -16,7 +16,7 @@ setup(
     packages=find_packages(),
     entry_points={
         'console_scripts': [
-            'onyxdb=onyxdb.cli:main',
+            'forgeql=forgeql.cli:main',
         ],
     },
     install_requires=[],
