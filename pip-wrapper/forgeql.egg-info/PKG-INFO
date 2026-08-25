@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
-Name: onyxdb
-Version: 0.1.4
+Name: forgeql
+Version: 4.0.0
 Summary: The Multi-Table Omni-Channel Database built on B+ Trees.
 Author: Bharath
 Classifier: Programming Language :: Python :: 3
@@ -9,35 +9,43 @@ Classifier: Operating System :: OS Independent
 Requires-Python: >=3.6
 Description-Content-Type: text/markdown
 
-# OnyxDB
+# ForgeQL (v0.2.0)
 
 **The Multi-Table Omni-Channel Database built natively on B+ Trees.**
 
-OnyxDB is an embedded, offline-first, high-performance database written entirely in Java. It features a built-in React dashboard for visual management, requiring zero external dependencies.
+ForgeQL is an embedded, offline-first, high-performance database written entirely in Java. It features a built-in React dashboard for visual management and zero external runtime dependencies.
 
 ## Quickstart
 
-Run the database instantly from your terminal:
+Run the database server instantly from your terminal:
 
-### Node.js (NPM)
 ```bash
-npx onyxdb
+pip install forgeql
+forgeql
 ```
 
-### Python (Pip)
-```bash
-pip install onyxdb
-onyxdb
+Or connect directly in Python:
+
+```python
+from forgeql import ForgeQL
+
+db = ForgeQL(host="http://localhost:8080", token="admin-secret-key")
+
+# Simple SDK Methods
+db.insert("users", 101, {"name": "Satoshi Nakamoto"})
+user = db.get("users", 101)
+
+# Forge Query Syntax (FQL)
+results = db.fql("FIND users WHERE role = ADMIN")
 ```
 
-## Features
-- **B+ Tree Storage Engine:** Ultra-fast disk-based storage with O(log n) lookups.
-- **Visual Dashboard:** An integrated, beautiful React UI served directly from the Java backend.
-- **Role-Based Access Control (RBAC):** Native `ADMIN` and `READ_ONLY` authorization.
-- **Write-Ahead Logging (WAL):** ACID compliance and system crash recovery.
-- **Vector Search (HNSW):** Built-in native support for Cosine Similarity and K-Nearest Neighbors for AI embeddings.
+## Core Features
+- **B+ Tree Storage Engine**: Disk-based storage with O(log n) lookups.
+- **Forge Query Syntax (FQL)**: Lightweight human-readable string query language (`GET`, `FIND`, `INSERT`, `UPDATE`, `DELETE`, `INDEX`).
+- **Visual Dashboard**: Integrated React UI served directly from the backend.
+- **Role-Based Access Control (RBAC)**: Native `ADMIN` and `READ_ONLY` authorization.
+- **Write-Ahead Logging (WAL)**: ACID durability and automated crash recovery.
+- **Vector Search (HNSW)**: Cosine Similarity and K-Nearest Neighbors for AI embeddings.
 
-## Architecture
-OnyxDB operates entirely offline. When you run the CLI command, it boots a Spring Boot server locally on your machine on port `8080`, exposing the REST API and the React Dashboard simultaneously.
-
-Enjoy using OnyxDB!
+## Engine Architecture
+ForgeQL operates offline. Running the CLI command boots a Spring Boot server on port `8080`, exposing the REST API and Forge Studio dashboard simultaneously.

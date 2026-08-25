@@ -3,9 +3,9 @@ import sys
 import subprocess
 import urllib.request
 
-JAR_NAME = 'forgeql-api-0.2.0.jar'
+JAR_NAME = 'forgeql-api-4.0.0.jar'
 JAR_PATH = os.path.join(os.path.dirname(__file__), JAR_NAME)
-DOWNLOAD_URL = f"https://github.com/Bharath80988/ForgeQL/releases/download/v0.2.0/{JAR_NAME}"
+DOWNLOAD_URL = f"https://github.com/Bharath80988/ForgeQL/releases/download/v4.0.0/{JAR_NAME}"
 
 def download_jar():
     print(f"Downloading ForgeQL engine from {DOWNLOAD_URL}...")

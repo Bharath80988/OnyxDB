@@ -6,9 +6,9 @@ const https = require('https');
 const http = require('http');
 const { spawn, execSync } = require('child_process');
 
-const JAR_NAME = 'forgeql-api-0.2.0.jar';
+const JAR_NAME = 'forgeql-api-4.0.0.jar';
 const JAR_PATH = path.join(__dirname, JAR_NAME);
-const DOWNLOAD_URL = `https://github.com/Bharath80988/ForgeQL/releases/download/v0.2.0/${JAR_NAME}`;
+const DOWNLOAD_URL = `https://github.com/Bharath80988/ForgeQL/releases/download/v4.0.0/${JAR_NAME}`;
 
 function downloadJar() {
     return new Promise((resolve, reject) => {

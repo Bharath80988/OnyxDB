@@ -1,2 +1,2 @@
 [console_scripts]
-onyxdb = onyxdb.cli:main
+forgeql = forgeql.cli:main
