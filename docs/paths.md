@@ -1,20 +1,20 @@
-# OnyxDB - Developer Path Reference Guide
+# ForgeQL - Developer Path Reference Guide
 
-This document defines the purpose, contents, and usage of every major path in the **OnyxDB** codebase to help new developers navigate and onboard seamlessly.
+This document defines the purpose, contents, and usage of every major path in the **ForgeQL** codebase to help new developers navigate and onboard seamlessly.
 
 ---
 
 ## 📂 Active Core & API Directories
 
-### 1. `onyxdb-core/src/main/java/com/onyxdb/core/index/`
+### 1. `forgeql-core/src/main/java/com/forgeql/core/index/`
 * **Purpose:** Core indexing structures.
 * **Contains:**
-  - [`BTreeManager.java`](file:///d:/db/onyxdb-core/src/main/java/com/onyxdb/core/index/BTreeManager.java): Primary key B+ Tree implementation.
-  - [`SecondaryBTreeIndex.java`](file:///d:/db/onyxdb-core/src/main/java/com/onyxdb/core/index/SecondaryBTreeIndex.java): Secondary attribute indexing.
+  - [`BTreeManager.java`](file:///d:/db/forgeql-core/src/main/java/com/forgeql/core/index/BTreeManager.java): Primary key B+ Tree implementation.
+  - [`SecondaryBTreeIndex.java`](file:///d:/db/forgeql-core/src/main/java/com/forgeql/core/index/SecondaryBTreeIndex.java): Secondary attribute indexing.
   - `hnsw/HnswIndex.java`: AI embedding KNN vector search engine.
 * **Used By:** `ExecutionEngine.java`.
 
-### 2. `onyxdb-core/src/main/java/com/onyxdb/core/storage/`
+### 2. `forgeql-core/src/main/java/com/forgeql/core/storage/`
 * **Purpose:** Disk persistence and page memory cache.
 * **Contains:**
   - `StorageManager.java`: Low-level RandomAccess disk file I/O.
@@ -22,17 +22,17 @@ This document defines the purpose, contents, and usage of every major path in th
   - `Page.java`: 8KB slotted page byte structure.
 * **Used By:** `BTreeManager.java`.
 
-### 3. `onyxdb-core/src/main/java/com/onyxdb/core/execution/`
+### 3. `forgeql-core/src/main/java/com/forgeql/core/execution/`
 * **Purpose:** Query processing engine.
 * **Contains:**
-  - [`ExecutionEngine.java`](file:///d:/db/onyxdb-core/src/main/java/com/onyxdb/core/execution/ExecutionEngine.java): Translates JSON query nodes into database operations across multi-table storage files.
+  - [`ExecutionEngine.java`](file:///d:/db/forgeql-core/src/main/java/com/forgeql/core/execution/ExecutionEngine.java): Translates JSON query nodes into database operations across multi-table storage files.
 * **Used By:** `QueryService.java`.
 
-### 4. `onyxdb-api/src/main/java/com/onyxdb/api/`
+### 4. `forgeql-api/src/main/java/com/forgeql/api/`
 * **Purpose:** Spring Boot REST server & RBAC security.
 * **Contains:**
-  - `OnyxDbApplication.java`: Main application bootstrapper.
-  - [`QueryController.java`](file:///d:/db/onyxdb-api/src/main/java/com/onyxdb/api/QueryController.java): REST endpoints & RBAC header guards.
+  - `ForgeDbApplication.java`: Main application bootstrapper.
+  - [`QueryController.java`](file:///d:/db/forgeql-api/src/main/java/com/forgeql/api/QueryController.java): REST endpoints & RBAC header guards.
   - `QueryService.java`: Service layer and Spring cache boundary.
 * **Used By:** HTTP clients, Web dashboard.
 
@@ -40,11 +40,11 @@ This document defines the purpose, contents, and usage of every major path in th
 
 ## 🎨 Active Frontend Dashboard Directories
 
-### 5. `onyxdb-dashboard/src/components/`
+### 5. `forgeql-dashboard/src/components/`
 * **Purpose:** Reusable UI components.
 * **Contains:** `Sidebar.tsx`, `Header.tsx`, `ThemeToggle.tsx`, `MetricCard.tsx`, `QueryEditor.tsx`, `QueryResults.tsx`.
 
-### 6. `onyxdb-dashboard/src/pages/`
+### 6. `forgeql-dashboard/src/pages/`
 * **Purpose:** Main views.
 * **Contains:** Overview metrics, Visual Query Builder, System Status dashboard, API documentation.
 

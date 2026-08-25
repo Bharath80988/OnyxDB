@@ -1,10 +1,10 @@
 {
-  "name": "onyxdb",
-  "version": "0.2.0",
+  "name": "forgeql",
+  "version": "4.0.0",
   "description": "The Multi-Table Omni-Channel Database built on B+ Trees.",
   "main": "index.js",
   "bin": {
-    "onyxdb": "./index.js"
+    "forgeql": "./index.js"
   },
   "scripts": {
     "start": "node index.js"

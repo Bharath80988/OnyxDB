@@ -1,0 +1,10 @@
+README.md
+setup.py
+forgeql/__init__.py
+forgeql/cli.py
+forgeql/client.py
+forgeql.egg-info/PKG-INFO
+forgeql.egg-info/SOURCES.txt
+forgeql.egg-info/dependency_links.txt
+forgeql.egg-info/entry_points.txt
+forgeql.egg-info/top_level.txt

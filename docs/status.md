@@ -1,11 +1,14 @@
-# OnyxDB System Status and Roadmap
+# ForgeQL System Status and Roadmap
 
-This document summarizes the current status, active capabilities, upcoming features, and architectural notes for **OnyxDB**.
+This document summarizes the current status, active capabilities, upcoming features, and architectural notes for **ForgeQL**.
 
 ---
 
-## Completed Capabilities (v3.0.0)
+## Completed Capabilities (v4.0.0)
 
+- [x] **Slotted Page Compaction & Defragmentation**: In-memory byte compacting (`Page.java` / `StorageManager.java`) eliminating internal page gaps from deletions and updates.
+- [x] **Cost-Based Query Optimizer (CBO) & Table Statistics**: Dynamic cardinality tracking (`TableStats.java`) and plan selectivity calculation (`QueryOptimizer.java`) integrated into `ExecutionEngine.java`.
+- [x] **SIMD Vector Math Acceleration**: 4-way loop-unrolled Cosine Distance calculations (`VectorMath.java`) optimizing CPU instruction-level parallelism.
 - [x] **OS-Level Memory Mapping (`mmap`)**: Zero-copy operating system virtual memory page mapping (`MmapStorageManager.java`) bypassing heap memory allocations and context switches.
 - [x] **Round-Robin Multi-Reactor TCP Server**: High-throughput non-blocking TCP socket server on port `8081` with Round-Robin worker load balancing (`RoundRobinWorkerGroup.java`).
 - [x] **Primary B+ Tree Indexing**: Logarithmic time ($O(\log N)$) inserts, lookups, splits, updates, and deletes over 8KB disk pages.
@@ -17,13 +20,14 @@ This document summarizes the current status, active capabilities, upcoming featu
 - [x] **Multi-Table Dynamic Routing**: Automatic creation and routing for table storage files (`<table_name>.db`).
 - [x] **LRU Buffer Pool Memory Cache**: Disk page caching with LRU page eviction policy.
 - [x] **Embedded Executable Uber-JAR**: Bundled React frontend static assets inside a standalone Java executable.
-- [x] **Onyx Wire Protocol (OWP)**: Binary socket framing protocol (`0x4F4E5958` header, 9-byte binary header) over NIO TCP sockets (`OnyxWireProtocol.java`).
-- [x] **`EXPLAIN` Query Profiler**: Cost-Based Query Optimizer (CBO) plan inspection for OQS queries (`EXPLAIN FIND ...`).
+- [x] **Forge Wire Protocol (OWP)**: Binary socket framing protocol (`0x4F4E5958` header, 9-byte binary header) over NIO TCP sockets (`ForgeWireProtocol.java`).
+- [x] **`EXPLAIN` Query Profiler**: Cost-Based Query Optimizer (CBO) plan inspection for FQL queries (`EXPLAIN FIND ...`).
 - [x] **Hybrid Search Engine**: Single query execution path combining HNSW KNN vector search with secondary index / relational metadata filtering (`executeHybridSearch`).
-- [x] **Interactive Onyx CLI**: Terminal REPL shell with command suggestions and query execution (`OnyxCli.java`).
-- [x] **High-Level Client SDKs**: Built-in helper wrappers in Python (`onyxdb.py`) and Node.js (`OnyxClient`).
-- [x] **Multi-Language Package Distribution**: Published zero-dependency Python package (`pip install onyxdb`) and Node.js package (`npx onyxdb`).
-- [x] **JWT Authentication & Studio Login**: Full-stack HMAC-SHA256 JWT auth (`JwtTokenProvider.java`), `/api/auth/login` endpoint, terminal CLI prompt (`OnyxCli.java`), and visual Onyx Studio login UI (`LoginPage.tsx`).
+- [x] **Interactive Forge CLI**: Terminal REPL shell with command suggestions and query execution (`ForgeCli.java`).
+- [x] **High-Level Client SDKs**: Built-in helper wrappers in Python (`forgeql.py`) and Node.js (`ForgeClient`).
+- [x] **Multi-Language Package Distribution**: Published zero-dependency Python package (`pip install forgeql`) and Node.js package (`npx forgeql`).
+- [x] **JWT Authentication & Studio Login**: Full-stack HMAC-SHA256 JWT auth (`JwtTokenProvider.java`), `/api/auth/login` endpoint, terminal CLI prompt (`ForgeCli.java`), and visual Forge Studio login UI (`LoginPage.tsx`).
+
 
 ---
 
@@ -36,6 +40,6 @@ This document summarizes the current status, active capabilities, upcoming featu
 
 ## Architecture Notes and System Health
 
-- **Build Status**: `BUILD SUCCESS` across all Maven modules (`onyxdb-core`, `onyxdb-api`, `onyxdb-dashboard`).
+- **Build Status**: `BUILD SUCCESS` across all Maven modules (`forgeql-core`, `forgeql-api`, `forgeql-dashboard`).
 - **Code Quality**: Clean modular architecture, standardized SLF4J logging, zero dead code.
 - **Technical Debt Level**: Low.

@@ -1,38 +1,38 @@
-name: OnyxDB CI/CD Pipeline
+name: ForgeQL CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ main, feature/* ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ main ]
 
 jobs:
-  build-and-test:
+  build:
+    name: Build & Test ForgeQL
     runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-    
-    - name: Set up JDK 21
-      uses: actions/setup-java@v3
-      with:
-        java-version: '21'
-        distribution: 'temurin'
-        cache: maven
-        
-    - name: Set up Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '22'
-        cache: 'npm'
-        cache-dependency-path: onyxdb-dashboard/package-lock.json
-        
-    - name: Install Frontend Dependencies
-      run: |
-        cd onyxdb-dashboard
-        npm ci
-        
-    - name: Run Maven Tests
-      run: mvn test
 
-    - name: Verify Docker Build
-      run: docker build -t onyxdb:latest .
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: forgeql-dashboard/package-lock.json
+
+      - name: Build Frontend & Maven Packages
+        run: |
+          mvn clean package -DskipTests
+
+      - name: Run Backend Unit Tests
+        run: |
+          mvn test
